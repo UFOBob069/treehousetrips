@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read access to all users for properties
+    match /properties/{document} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+        (request.auth.uid == resource.data.ownerId || 
+         request.auth.uid == request.resource.data.ownerId);
+    }
+    
+    // Allow read/write access to users for their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow read/write access to bookings for authenticated users
+    match /bookings/{document} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow read/write access to payments for authenticated users
+    match /payments/{document} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow read/write access to conversations for participants
+    match /conversations/{conversationId} {
+      allow read, write: if request.auth != null && 
+        (request.auth.uid == resource.data.hostId || 
+         request.auth.uid == resource.data.travelerId ||
+         request.auth.uid == request.resource.data.hostId ||
+         request.auth.uid == request.resource.data.travelerId);
+    }
+    
+    // Allow read access to messages for conversation participants
+    // Allow create/update for message senders
+    match /messages/{messageId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.senderId;
+      allow update: if request.auth != null && request.auth.uid == resource.data.senderId;
+    }
+    
+    // Allow read/write access to test collection for debugging
+    match /test/{document} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

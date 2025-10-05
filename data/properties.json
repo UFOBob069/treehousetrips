@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1",
+    "name": "Sky High Sanctuary",
+    "description": "An architectural masterpiece nestled 40 feet above the forest floor, offering panoramic views of the Pacific Northwest. This luxury treehouse features floor-to-ceiling windows, a private hot tub, and a spiral staircase leading to a rooftop deck.",
+    "location": "Portland, Oregon",
+    "lat": 45.5152,
+    "lng": -122.6784,
+    "airbnbUrl": "https://airbnb.com/rooms/sky-high-sanctuary",
+    "hostEmail": "host1@example.com",
+    "images": [
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
+      "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800"
+    ],
+    "tags": ["Luxury", "Off-the-Grid", "Romantic", "Hot Tub"],
+    "price": "$450/night",
+    "guests": 4,
+    "bedrooms": 2,
+    "bathrooms": 1
+  },
+  {
+    "id": "2",
+    "name": "Whispering Pines Retreat",
+    "description": "A family-friendly treehouse complex with multiple connected platforms, rope bridges, and a tree-top zip line. Perfect for adventurous families seeking an unforgettable forest experience.",
+    "location": "Asheville, North Carolina",
+    "lat": 35.5951,
+    "lng": -82.5515,
+    "airbnbUrl": "https://airbnb.com/rooms/whispering-pines",
+    "hostEmail": "host2@example.com",
+    "images": [
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
+      "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800"
+    ],
+    "tags": ["Family-Friendly", "Adventure", "Multiple Platforms", "Zip Line"],
+    "price": "$320/night",
+    "guests": 8,
+    "bedrooms": 3,
+    "bathrooms": 2
+  },
+  {
+    "id": "3",
+    "name": "Eco-Treehouse Haven",
+    "description": "A completely sustainable, off-grid treehouse powered by solar panels with composting toilets and rainwater collection. Experience true eco-living while surrounded by ancient redwoods.",
+    "location": "Big Sur, California",
+    "lat": 36.2704,
+    "lng": -121.8079,
+    "airbnbUrl": "https://airbnb.com/rooms/eco-treehouse",
+    "hostEmail": "host3@example.com",
+    "images": [
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
+      "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800"
+    ],
+    "tags": ["Off-the-Grid", "Eco-Friendly", "Solar Powered", "Redwoods"],
+    "price": "$280/night",
+    "guests": 2,
+    "bedrooms": 1,
+    "bathrooms": 1
+  }
+]

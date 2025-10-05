@@ -1,0 +1,33 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Property images - authenticated users can upload, anyone can read
+    match /properties/{propertyId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+        (request.auth.uid == resource.metadata.ownerId || 
+         request.auth.uid == request.resource.metadata.ownerId);
+    }
+    
+    // User profile pictures - users can only access their own
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Host documents (contracts, certificates, etc.) - private to owner
+    match /hosts/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Temporary uploads - authenticated users can upload, auto-cleanup
+    match /temp/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Public assets (logos, default images) - read-only for everyone
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false; // Only admins can upload public assets
+    }
+  }
+}
