@@ -132,7 +132,7 @@ function extractFromJsonLd(html: string): Partial<ScrapedListing> {
   
   try {
     // Find JSON-LD script tags
-    const jsonLdMatches = html.match(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)
+    const jsonLdMatches = html.match(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/g)
     
     if (!jsonLdMatches) {
       console.log('No JSON-LD found')
@@ -144,7 +144,7 @@ function extractFromJsonLd(html: string): Partial<ScrapedListing> {
     for (const match of jsonLdMatches) {
       try {
         // Extract JSON content
-        const jsonMatch = match.match(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/s)
+        const jsonMatch = match.match(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/)
         if (!jsonMatch) continue
         
         const jsonContent = jsonMatch[1].trim()
@@ -325,7 +325,7 @@ function extractLocation(document: Document): string {
     const elements = document.querySelectorAll(selector)
     console.log(`Selector "${selector}": Found ${elements.length} elements`)
     
-    for (const element of elements) {
+    for (const element of Array.from(elements)) {
       const text = element.textContent?.trim()
       if (text) {
         console.log(`Element text: "${text}"`)
@@ -349,7 +349,7 @@ function extractLocation(document: Document): string {
   
   // Fallback: look in title area for location
   const titleElements = document.querySelectorAll('h1, h2, h3')
-  for (const element of titleElements) {
+  for (const element of Array.from(titleElements)) {
     const text = element.textContent?.trim() || ''
     
     // Pattern: "Property Name - Treehouses for Rent in Location"
@@ -521,7 +521,7 @@ function extractImages(document: Document): string[] {
   }
   
   console.log('Final images:', images.slice(0, 3))
-  return [...new Set(images)].slice(0, 10) // Remove duplicates and limit to 10
+  return Array.from(new Set(images)).slice(0, 10) // Remove duplicates and limit to 10
 }
 
 function extractGuests(document: Document): number {

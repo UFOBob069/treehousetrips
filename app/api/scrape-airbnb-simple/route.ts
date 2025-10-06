@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 function extractFromJsonLd(html: string): Partial<ScrapedListing> {
   try {
     // Find JSON-LD script tags
-    const jsonLdMatches = html.match(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)
+    const jsonLdMatches = html.match(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/g)
     
     if (!jsonLdMatches) {
       return {}
@@ -98,7 +98,7 @@ function extractFromJsonLd(html: string): Partial<ScrapedListing> {
     for (const match of jsonLdMatches) {
       try {
         // Extract JSON content
-        const jsonMatch = match.match(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/s)
+        const jsonMatch = match.match(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/)
         if (!jsonMatch) continue
         
         const jsonContent = jsonMatch[1].trim()
@@ -240,7 +240,7 @@ function extractLocation(document: Document): string {
   
   // Fallback: look in title area for location
   const titleElements = document.querySelectorAll('h1, h2, h3')
-  for (const element of titleElements) {
+  for (const element of Array.from(titleElements)) {
     const text = element.textContent?.trim() || ''
     
     // Pattern: "Property Name - Treehouses for Rent in Location"
@@ -333,7 +333,7 @@ function extractImages(document: Document): string[] {
     if (images.length > 0) break
   }
   
-  return [...new Set(images)].slice(0, 10) // Remove duplicates and limit to 10
+  return Array.from(new Set(images)).slice(0, 10) // Remove duplicates and limit to 10
 }
 
 function extractGuests(document: Document): number {

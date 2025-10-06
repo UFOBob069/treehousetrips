@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     await page.goto(url, { waitUntil: 'networkidle2' })
     
     // Wait for content to load
-    await page.waitForTimeout(3000)
+    await new Promise(resolve => setTimeout(resolve, 3000))
     
     // Get the page content
     const content = await page.content()
@@ -163,7 +163,7 @@ function extractImages(document: Document): string[] {
     if (images.length > 0) break
   }
   
-  return [...new Set(images)].slice(0, 10) // Remove duplicates and limit to 10
+  return Array.from(new Set(images)).slice(0, 10) // Remove duplicates and limit to 10
 }
 
 function extractGuests(document: Document): number {

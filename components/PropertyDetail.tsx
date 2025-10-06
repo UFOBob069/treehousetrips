@@ -287,6 +287,10 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           lat: property.lat,
           lng: property.lng,
           isPublished: property.isPublished || true,
+          isPaid: true, // Assume paid for contact purposes
+          subscriptionStatus: 'active' as const,
+          subscriptionStartDate: new Date() as any,
+          subscriptionEndDate: new Date() as any,
           ownerId: property.ownerId || 'unknown',
           createdAt: new Date() as any,
           updatedAt: new Date() as any,

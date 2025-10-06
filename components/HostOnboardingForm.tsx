@@ -139,7 +139,9 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
         reviewCount: result.data.reviewCount,
         lat: result.data.lat,
         lng: result.data.lng,
-        isPublished: false
+        isPublished: false,
+        isPaid: false,
+        subscriptionStatus: 'pending'
       })
       
       setStep('edit')
@@ -184,7 +186,7 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
       console.log('Property created successfully with ID:', id)
       setSuccess(true)
       setTimeout(() => {
-        onSuccess(formData.title, id)
+        onSuccess(formData.title, id || '')
       }, 2000)
     } catch (err) {
       console.error('Unexpected error:', err)

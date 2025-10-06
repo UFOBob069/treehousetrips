@@ -16,6 +16,11 @@ interface Property {
   guests: number
   bedrooms: number
   bathrooms: number
+  ownerId: string
+  title: string
+  contactEmail: string
+  isPublished: boolean
+  exactAddress?: string
 }
 
 async function getProperty(id: string): Promise<Property | null> {
@@ -50,7 +55,11 @@ async function getProperty(id: string): Promise<Property | null> {
         price: "$450",
         guests: 4,
         bedrooms: 2,
-        bathrooms: 1
+        bathrooms: 1,
+        ownerId: "host1",
+        title: "Sky High Sanctuary",
+        contactEmail: "host1@example.com",
+        isPublished: true
       },
       {
         id: "2",
@@ -72,7 +81,11 @@ async function getProperty(id: string): Promise<Property | null> {
         price: "$320",
         guests: 8,
         bedrooms: 3,
-        bathrooms: 2
+        bathrooms: 2,
+        ownerId: "host2",
+        title: "Whispering Pines Retreat",
+        contactEmail: "host2@example.com",
+        isPublished: true
       },
       {
         id: "3",
@@ -94,7 +107,11 @@ async function getProperty(id: string): Promise<Property | null> {
         price: "$280",
         guests: 2,
         bedrooms: 1,
-        bathrooms: 1
+        bathrooms: 1,
+        ownerId: "host3",
+        title: "Eco-Treehouse Haven",
+        contactEmail: "host3@example.com",
+        isPublished: true
       }
     ]
     
