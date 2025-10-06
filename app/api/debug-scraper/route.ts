@@ -34,7 +34,12 @@ export async function POST(request: NextRequest) {
     const document = dom.window.document
     
     // Debug: Find all elements that might contain location
-    const locationCandidates = []
+    const locationCandidates: Array<{
+      selector: string
+      text: string
+      className: string
+      tagName: string
+    }> = []
     const locationSelectors = [
       '.s1qk96pm',
       '[class*="location"]',
@@ -63,7 +68,13 @@ export async function POST(request: NextRequest) {
     })
     
     // Debug: Find all images
-    const imageCandidates = []
+    const imageCandidates: Array<{
+      src: string | null
+      dataOriginalUri: string | null
+      className: string
+      alt: string | null
+      id: string | null
+    }> = []
     const allImages = document.querySelectorAll('img')
     allImages.forEach(img => {
       const src = img.getAttribute('src')
@@ -82,7 +93,12 @@ export async function POST(request: NextRequest) {
     })
     
     // Debug: Find title elements
-    const titleCandidates = []
+    const titleCandidates: Array<{
+      selector: string
+      text: string
+      className: string
+      tagName: string
+    }> = []
     const titleSelectors = ['h1', 'h2', 'title', '[class*="title"]', '[data-testid*="title"]']
     titleSelectors.forEach(selector => {
       const elements = document.querySelectorAll(selector)
