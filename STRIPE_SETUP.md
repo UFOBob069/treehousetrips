@@ -20,8 +20,27 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ## 3. Webhook Setup
 1. In Stripe Dashboard, go to Developers → Webhooks
 2. Add endpoint: `https://yourdomain.com/api/webhook/stripe`
-3. Select events: `checkout.session.completed`
+3. Select these events:
+   - ✅ `checkout.session.completed` (Critical - activates listing)
+   - ✅ `payment_intent.succeeded` (Confirms payment)
+   - ✅ `payment_intent.payment_failed` (Payment failed)
+   - ✅ `checkout.session.expired` (Session timeout)
+   - ✅ `charge.refunded` (Refund issued)
+   - ✅ `charge.dispute.created` (Dispute opened)
+   - ✅ `charge.dispute.closed` (Dispute resolved)
+   - ✅ `payment_intent.canceled` (Payment cancelled)
 4. Copy the webhook secret to `STRIPE_WEBHOOK_SECRET`
+
+### Testing Webhooks Locally
+```bash
+# Install Stripe CLI
+stripe listen --forward-to localhost:3000/api/webhook/stripe
+
+# Test events
+stripe trigger checkout.session.completed
+stripe trigger payment_intent.succeeded
+stripe trigger charge.refunded
+```
 
 ## 4. Test Cards
 Use these test card numbers:
