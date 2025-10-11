@@ -33,23 +33,112 @@ export async function POST(request: NextRequest) {
         const propertyId = session.metadata?.propertyId
         const propertyTitle = session.metadata?.propertyTitle
         
-        if (propertyId) {
-          // Calculate subscription end date (1 year from now)
-          const endDate = new Date()
-          endDate.setFullYear(endDate.getFullYear() + 1)
+        if (propertyId && session.mode === 'subscription') {
+          // Get subscription details
+          const subscription = await stripe.subscriptions.retrieve(
+            session.subscription as string
+          )
           
-          // Update property with payment information
+          // Calculate subscription end date from Stripe subscription
+          const endDate = new Date(subscription.current_period_end * 1000)
+          
+          // Update property with subscription information
           await updateProperty(propertyId, {
             isPaid: true,
             subscriptionStatus: 'active',
-            subscriptionStartDate: new Date() as any,
+            subscriptionStartDate: new Date(subscription.current_period_start * 1000) as any,
             subscriptionEndDate: endDate as any,
             stripePaymentId: session.payment_intent as string,
+            stripeSubscriptionId: subscription.id,
+            stripeCustomerId: subscription.customer as string,
             isPublished: true, // Auto-publish after payment
           })
           
-          console.log(`✅ Listing fee paid for property ${propertyId}: ${propertyTitle}`)
-          console.log(`Subscription active until: ${endDate.toLocaleDateString()}`)
+          console.log(`✅ Annual subscription activated for property ${propertyId}: ${propertyTitle}`)
+          console.log(`Subscription ID: ${subscription.id}`)
+          console.log(`Renews: ${endDate.toLocaleDateString()}`)
+        }
+        break
+      }
+      
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription
+        const propertyId = subscription.metadata?.propertyId
+        
+        if (propertyId) {
+          const endDate = new Date(subscription.current_period_end * 1000)
+          const status = subscription.status === 'active' ? 'active' : 
+                        subscription.status === 'canceled' ? 'canceled' : 'expired'
+          
+          await updateProperty(propertyId, {
+            subscriptionStatus: status,
+            subscriptionEndDate: endDate as any,
+            isPublished: status === 'active',
+          })
+          
+          console.log(`🔄 Subscription updated for property ${propertyId}`)
+          console.log(`New status: ${status}, Ends: ${endDate.toLocaleDateString()}`)
+        }
+        break
+      }
+      
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription
+        const propertyId = subscription.metadata?.propertyId
+        
+        if (propertyId) {
+          await updateProperty(propertyId, {
+            subscriptionStatus: 'canceled',
+            isPublished: false,
+            isPaid: false,
+          })
+          
+          console.log(`❌ Subscription canceled for property ${propertyId}`)
+        }
+        break
+      }
+      
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice
+        
+        // This fires on renewal payments
+        if (invoice.billing_reason === 'subscription_cycle') {
+          const subscription = await stripe.subscriptions.retrieve(
+            invoice.subscription as string
+          )
+          const propertyId = subscription.metadata?.propertyId
+          
+          if (propertyId) {
+            const endDate = new Date(subscription.current_period_end * 1000)
+            
+            await updateProperty(propertyId, {
+              subscriptionStatus: 'active',
+              subscriptionEndDate: endDate as any,
+              isPublished: true,
+            })
+            
+            console.log(`✅ Renewal payment succeeded for property ${propertyId}`)
+            console.log(`Next renewal: ${endDate.toLocaleDateString()}`)
+          }
+        }
+        break
+      }
+      
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice
+        const subscription = await stripe.subscriptions.retrieve(
+          invoice.subscription as string
+        )
+        const propertyId = subscription.metadata?.propertyId
+        
+        if (propertyId) {
+          await updateProperty(propertyId, {
+            subscriptionStatus: 'expired',
+            isPublished: false,
+          })
+          
+          console.error(`❌ Renewal payment failed for property ${propertyId}`)
+          // TODO: Send email to host about failed payment
         }
         break
       }

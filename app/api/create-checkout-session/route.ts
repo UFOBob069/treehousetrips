@@ -13,31 +13,45 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Create Stripe checkout session
+    // Create Stripe checkout session for annual subscription
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price_data: {
-            currency: 'usd',
-          product_data: {
-            name: 'Treehouse Trips Annual Listing Fee',
-            description: `Annual listing fee for "${propertyTitle}"`,
-            images: ['https://treehousetrips.com/logo.png'], // Replace with your logo
-          },
-            unit_amount: 5000, // $50.00 in cents
-          },
+          // Option 1: Use your Price ID (recommended)
+          price: process.env.STRIPE_SUBSCRIPTION_PRICE_ID || 'price_xxxxxxxxxxxx',
           quantity: 1,
+          
+          // Option 2: Create dynamic subscription price (alternative)
+          // price_data: {
+          //   currency: 'usd',
+          //   product_data: {
+          //     name: 'Treehouse Trips Annual Listing',
+          //     description: `Annual subscription for "${propertyTitle}"`,
+          //     images: ['https://treehousetrips.com/logo.png'],
+          //   },
+          //   unit_amount: 5000, // $50.00 in cents
+          //   recurring: {
+          //     interval: 'year',
+          //   },
+          // },
         },
       ],
-      mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?payment=success`,
+      mode: 'subscription', // Changed from 'payment' to 'subscription'
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?payment=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/create?payment=cancelled`,
       metadata: {
         userId,
         propertyId,
         propertyTitle,
-        type: 'listing_fee'
+        type: 'annual_subscription'
+      },
+      subscription_data: {
+        metadata: {
+          userId,
+          propertyId,
+          propertyTitle,
+        },
       },
     })
 

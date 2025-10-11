@@ -17,18 +17,42 @@ STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
-## 3. Webhook Setup
+## 3. Create Subscription Product
+1. Go to Stripe Dashboard → Products → Add Product
+2. Fill in:
+   - Name: `Treehouse Trips Annual Listing`
+   - Description: `Annual subscription for one treehouse property`
+   - Billing period: **Yearly**
+   - Price: `$50.00`
+3. Copy the **Price ID** (starts with `price_`)
+4. Add to `.env.local`:
+   ```bash
+   STRIPE_SUBSCRIPTION_PRICE_ID=price_xxxxxxxxxxxx
+   ```
+
+## 4. Webhook Setup
 1. In Stripe Dashboard, go to Developers → Webhooks
 2. Add endpoint: `https://yourdomain.com/api/webhook/stripe`
 3. Select these events:
-   - ✅ `checkout.session.completed` (Critical - activates listing)
-   - ✅ `payment_intent.succeeded` (Confirms payment)
+   
+   **Critical - Subscription Events:**
+   - ✅ `checkout.session.completed` (Initial subscription)
+   - ✅ `customer.subscription.updated` (Subscription changes)
+   - ✅ `customer.subscription.deleted` (Subscription canceled)
+   - ✅ `invoice.payment_succeeded` (Renewal successful)
+   - ✅ `invoice.payment_failed` (Renewal failed)
+   
+   **Payment Events:**
+   - ✅ `payment_intent.succeeded` (Payment confirmed)
    - ✅ `payment_intent.payment_failed` (Payment failed)
    - ✅ `checkout.session.expired` (Session timeout)
+   
+   **Refund & Dispute Events:**
    - ✅ `charge.refunded` (Refund issued)
    - ✅ `charge.dispute.created` (Dispute opened)
    - ✅ `charge.dispute.closed` (Dispute resolved)
    - ✅ `payment_intent.canceled` (Payment cancelled)
+
 4. Copy the webhook secret to `STRIPE_WEBHOOK_SECRET`
 
 ### Testing Webhooks Locally

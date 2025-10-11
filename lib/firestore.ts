@@ -49,8 +49,10 @@ export interface Property {
   isPaid: boolean
   subscriptionStartDate?: Timestamp
   subscriptionEndDate?: Timestamp
-  subscriptionStatus?: 'active' | 'expired' | 'pending'
+  subscriptionStatus?: 'active' | 'expired' | 'pending' | 'canceled'
   stripePaymentId?: string
+  stripeSubscriptionId?: string
+  stripeCustomerId?: string
   createdAt: Timestamp
   updatedAt: Timestamp
   ownerId: string

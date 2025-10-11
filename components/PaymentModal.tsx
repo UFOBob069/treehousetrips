@@ -102,16 +102,17 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, propertyTitle
                 </p>
                 
                 <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-primary-900 mb-2">Annual Listing Fee - $50</h3>
+                  <h3 className="font-semibold text-primary-900 mb-2">Annual Subscription - $50/year</h3>
                   <ul className="text-sm text-primary-800 space-y-1">
                     <li>• Active listing for 12 months</li>
+                    <li>• Automatically renews annually</li>
+                    <li>• Cancel anytime from your dashboard</li>
                     <li>• Premium placement in search results</li>
                     <li>• Direct guest contact information</li>
                     <li>• Priority customer support</li>
-                    <li>• Analytics and insights</li>
                   </ul>
                   <p className="text-xs text-primary-700 mt-2">
-                    Each listing requires its own annual fee
+                    Each listing requires its own subscription. Cancel anytime.
                   </p>
                 </div>
               </div>
