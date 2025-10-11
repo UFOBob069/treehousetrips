@@ -40,29 +40,30 @@ export async function POST(request: NextRequest) {
           )
           
           // Calculate subscription end date from Stripe subscription
-          const endDate = new Date(subscription.current_period_end * 1000)
+          const endDate = new Date((subscription as any).current_period_end * 1000)
+          const startDate = new Date((subscription as any).current_period_start * 1000)
           
           // Update property with subscription information
           await updateProperty(propertyId, {
             isPaid: true,
             subscriptionStatus: 'active',
-            subscriptionStartDate: new Date(subscription.current_period_start * 1000) as any,
+            subscriptionStartDate: startDate as any,
             subscriptionEndDate: endDate as any,
             stripePaymentId: session.payment_intent as string,
-            stripeSubscriptionId: subscription.id,
-            stripeCustomerId: subscription.customer as string,
+            stripeSubscriptionId: (subscription as any).id,
+            stripeCustomerId: (subscription as any).customer,
             isPublished: true, // Auto-publish after payment
           })
           
           console.log(`✅ Annual subscription activated for property ${propertyId}: ${propertyTitle}`)
-          console.log(`Subscription ID: ${subscription.id}`)
+          console.log(`Subscription ID: ${(subscription as any).id}`)
           console.log(`Renews: ${endDate.toLocaleDateString()}`)
         }
         break
       }
       
       case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as any
         const propertyId = subscription.metadata?.propertyId
         
         if (propertyId) {
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
       }
       
       case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as any
         const propertyId = subscription.metadata?.propertyId
         
         if (propertyId) {
@@ -99,13 +100,13 @@ export async function POST(request: NextRequest) {
       }
       
       case 'invoice.payment_succeeded': {
-        const invoice = event.data.object as Stripe.Invoice
+        const invoice = event.data.object as any
         
         // This fires on renewal payments
         if (invoice.billing_reason === 'subscription_cycle') {
           const subscription = await stripe.subscriptions.retrieve(
             invoice.subscription as string
-          )
+          ) as any
           const propertyId = subscription.metadata?.propertyId
           
           if (propertyId) {
@@ -125,10 +126,10 @@ export async function POST(request: NextRequest) {
       }
       
       case 'invoice.payment_failed': {
-        const invoice = event.data.object as Stripe.Invoice
+        const invoice = event.data.object as any
         const subscription = await stripe.subscriptions.retrieve(
           invoice.subscription as string
-        )
+        ) as any
         const propertyId = subscription.metadata?.propertyId
         
         if (propertyId) {
