@@ -2,9 +2,11 @@
 
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Menu, X, Search, User, LogOut, Settings, Home, MessageCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import AuthModal from './AuthModal'
+import LocationSearch from './LocationSearch'
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)

@@ -1,12 +1,25 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Image from 'next/image'
 import Link from 'next/link'
 import { TreePine, Star, Heart, Zap } from 'lucide-react'
+
+// Component to fit map bounds
+function FitBounds({ bounds }: { bounds: [[number, number], [number, number]] | null }) {
+  const map = useMap()
+  
+  useEffect(() => {
+    if (bounds) {
+      map.fitBounds(bounds, { padding: [20, 20] })
+    }
+  }, [bounds, map])
+  
+  return null
+}
 
 // Fix for default markers in React Leaflet - only run on client side
 if (typeof window !== 'undefined') {
@@ -101,7 +114,7 @@ export default function MapViewClient({ properties, visibleProperties, selectedP
     }))
   }
 
-  // Calculate center point from visible properties, with fallback
+  // Calculate bounds and center from visible properties
   const validProperties = visibleProperties.filter(p => 
     typeof p.lat === 'number' && 
     typeof p.lng === 'number' && 
@@ -109,13 +122,47 @@ export default function MapViewClient({ properties, visibleProperties, selectedP
     !isNaN(p.lng)
   )
   
-  const centerLat = validProperties.length > 0 
-    ? validProperties.reduce((sum, p) => sum + p.lat, 0) / validProperties.length
-    : 45.5152 // Default to Portland, Oregon
+  // Calculate bounds to fit all properties
+  const calculateBounds = (properties: typeof validProperties) => {
+    if (properties.length === 0) {
+      return {
+        center: [45.5152, -122.6784], // Default to Portland, Oregon
+        bounds: null
+      }
+    }
+    
+    if (properties.length === 1) {
+      return {
+        center: [properties[0].lat, properties[0].lng],
+        bounds: null
+      }
+    }
+    
+    const lats = properties.map(p => p.lat)
+    const lngs = properties.map(p => p.lng)
+    
+    const minLat = Math.min(...lats)
+    const maxLat = Math.max(...lats)
+    const minLng = Math.min(...lngs)
+    const maxLng = Math.max(...lngs)
+    
+    // Add padding to bounds
+    const latPadding = (maxLat - minLat) * 0.1
+    const lngPadding = (maxLng - minLng) * 0.1
+    
+    return {
+      center: [
+        (minLat + maxLat) / 2,
+        (minLng + maxLng) / 2
+      ],
+      bounds: [
+        [minLat - latPadding, minLng - lngPadding],
+        [maxLat + latPadding, maxLng + lngPadding]
+      ]
+    }
+  }
   
-  const centerLng = validProperties.length > 0 
-    ? validProperties.reduce((sum, p) => sum + p.lng, 0) / validProperties.length
-    : -122.6784 // Default to Portland, Oregon
+  const { center, bounds } = calculateBounds(validProperties)
 
   if (!isMounted) {
     return (
@@ -139,8 +186,8 @@ export default function MapViewClient({ properties, visibleProperties, selectedP
   return (
     <div className="h-full rounded-lg overflow-visible relative">
       <MapContainer
-        center={[centerLat, centerLng]}
-        zoom={6}
+        center={center}
+        zoom={bounds ? 6 : 6}
         style={{ height: '100%', width: '100%' }}
         zoomControl={true}
         scrollWheelZoom={true}
@@ -154,6 +201,7 @@ export default function MapViewClient({ properties, visibleProperties, selectedP
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <FitBounds bounds={bounds} />
         {validProperties.map((property) => {
           const isSelected = selectedProperty?.id === property.id
           const isHovered = hoveredProperty?.id === property.id

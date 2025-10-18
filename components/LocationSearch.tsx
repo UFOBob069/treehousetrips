@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { MapPin, Loader2 } from 'lucide-react'
+import { Search, MapPin, Loader2 } from 'lucide-react'
 
-interface AddressSuggestion {
+interface LocationSuggestion {
   place_name: string
   geometry: {
     coordinates: [number, number]
@@ -14,39 +14,34 @@ interface AddressSuggestion {
   }>
 }
 
-interface AddressDetails {
-  address: string
-  coordinates?: [number, number]
-  city?: string
-  state?: string
-  country?: string
-}
-
-interface AddressAutocompleteProps {
-  value: string
-  onChange: (address: string, coordinates?: [number, number], details?: AddressDetails) => void
+interface LocationSearchProps {
+  onLocationSelect: (location: {
+    name: string
+    coordinates: [number, number]
+    bounds?: [[number, number], [number, number]]
+  }) => void
   placeholder?: string
   className?: string
 }
 
-export default function AddressAutocomplete({
-  value,
-  onChange,
-  placeholder = "Enter exact address",
+export default function LocationSearch({
+  onLocationSelect,
+  placeholder = "Search for a location...",
   className = ""
-}: AddressAutocompleteProps) {
-  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
+}: LocationSearchProps) {
+  const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [loading, setLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [query, setQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
 
-  // Mapbox access token - you'll need to add this to your environment variables
+  // Mapbox access token
   const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
-  const searchAddresses = async (query: string) => {
-    if (!query || query.length < 3) {
+  const searchLocations = async (searchQuery: string) => {
+    if (!searchQuery || searchQuery.length < 2) {
       setSuggestions([])
       setShowSuggestions(false)
       return
@@ -60,7 +55,7 @@ export default function AddressAutocomplete({
     setLoading(true)
     try {
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&types=address&limit=5`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&types=place,locality,neighborhood,address&limit=5`
       )
       const data = await response.json()
       
@@ -69,46 +64,37 @@ export default function AddressAutocomplete({
         setShowSuggestions(true)
       }
     } catch (error) {
-      console.error('Error fetching address suggestions:', error)
+      console.error('Error fetching location suggestions:', error)
     } finally {
       setLoading(false)
     }
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value
-    onChange(query)
-    searchAddresses(query)
+    const value = e.target.value
+    setQuery(value)
+    searchLocations(value)
     setSelectedIndex(-1)
   }
 
-  const handleSuggestionClick = (suggestion: AddressSuggestion) => {
-    // Extract city, state, and country from context
-    let city: string | undefined
-    let state: string | undefined
-    let country: string | undefined
+  const handleSuggestionClick = (suggestion: LocationSuggestion) => {
+    const coordinates = suggestion.geometry.coordinates as [number, number]
     
-    if (suggestion.context) {
-      suggestion.context.forEach(ctx => {
-        if (ctx.id.startsWith('place')) {
-          city = ctx.text
-        } else if (ctx.id.startsWith('region')) {
-          state = ctx.text
-        } else if (ctx.id.startsWith('country')) {
-          country = ctx.text
-        }
-      })
-    }
+    // Calculate bounds for the location (approximate)
+    const lat = coordinates[1]
+    const lng = coordinates[0]
+    const bounds: [[number, number], [number, number]] = [
+      [lat - 0.1, lng - 0.1],
+      [lat + 0.1, lng + 0.1]
+    ]
     
-    const details: AddressDetails = {
-      address: suggestion.place_name,
-      coordinates: suggestion.geometry.coordinates,
-      city,
-      state,
-      country
-    }
+    onLocationSelect({
+      name: suggestion.place_name,
+      coordinates,
+      bounds
+    })
     
-    onChange(suggestion.place_name, suggestion.geometry.coordinates, details)
+    setQuery(suggestion.place_name)
     setShowSuggestions(false)
     setSuggestions([])
     setSelectedIndex(-1)
@@ -152,31 +138,28 @@ export default function AddressAutocomplete({
   const handleFocus = () => {
     if (suggestions.length > 0) {
       setShowSuggestions(true)
-    } else if (value && value.length >= 3) {
-      // If there's a preloaded value, search for it to get suggestions
-      searchAddresses(value)
     }
   }
 
   return (
-    <div className="relative">
+    <div className={`relative ${className}`}>
       <div className="relative">
         <input
           ref={inputRef}
           type="text"
-          value={value}
+          value={query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           onFocus={handleFocus}
           placeholder={placeholder}
-          className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-10 ${className}`}
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
           ) : (
-            <MapPin className="h-4 w-4 text-gray-400" />
+            <Search className="h-4 w-4 text-gray-400" />
           )}
         </div>
       </div>

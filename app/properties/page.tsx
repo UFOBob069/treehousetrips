@@ -6,6 +6,7 @@ import TagFilter from '@/components/TagFilter'
 import ToggleSwitch from '@/components/ToggleSwitch'
 import DisplayToggle from '@/components/DisplayToggle'
 import MapView from '@/components/MapView'
+import MobileFilterDropdown from '@/components/MobileFilterDropdown'
 
 interface Property {
   id: string
@@ -30,7 +31,7 @@ export default function PropertiesPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [guestFilter, setGuestFilter] = useState<number | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [displayMode, setDisplayMode] = useState<'map' | 'table'>('map')
+  const [displayMode, setDisplayMode] = useState<'map' | 'table'>('table')
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const [hoveredProperty, setHoveredProperty] = useState<Property | null>(null)
   const [allTags, setAllTags] = useState<string[]>([])
@@ -102,55 +103,19 @@ export default function PropertiesPage() {
       {/* Fixed Filters */}
       <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
         <div className="w-full px-4 sm:px-6 lg:px-8 py-3">
-          {/* Mobile: Simple View Toggle */}
-          <div className="lg:hidden">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-gray-700">
-                {filteredProperties.length} treehouse{filteredProperties.length !== 1 ? 's' : ''}
-              </span>
-              <DisplayToggle displayMode={displayMode} onDisplayModeChange={setDisplayMode} />
-            </div>
-            
-            {/* Mobile Filters - Compact */}
-            <div className="space-y-2">
-              <div>
-                <h4 className="text-xs font-medium text-gray-600 mb-1">Guests:</h4>
-                <div className="flex gap-2 flex-wrap">
-                  <button
-                    onClick={() => setGuestFilter(null)}
-                    className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
-                      guestFilter === null
-                        ? 'bg-forest-600 text-white'
-                        : 'bg-gray-200 text-gray-700'
-                    }`}
-                  >
-                    Any
-                  </button>
-                  {[2, 4, 6, 8].map((guests) => (
-                    <button
-                      key={guests}
-                      onClick={() => setGuestFilter(guests)}
-                      className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
-                        guestFilter === guests
-                          ? 'bg-forest-600 text-white'
-                          : 'bg-gray-200 text-gray-700'
-                      }`}
-                    >
-                      {guests}+
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-xs font-medium text-gray-600 mb-1">Features:</h4>
-                <TagFilter 
-                  tags={allTags.slice(0, 6)} 
-                  selectedTags={selectedTags} 
-                  onTagToggle={handleTagToggle} 
-                />
-              </div>
-            </div>
+          {/* Mobile: Filter Dropdown */}
+          <MobileFilterDropdown
+            allTags={allTags}
+            selectedTags={selectedTags}
+            onTagToggle={handleTagToggle}
+            guestFilter={guestFilter}
+            onGuestFilterChange={setGuestFilter}
+            filteredCount={filteredProperties.length}
+          />
+          
+          {/* Mobile: View Toggle */}
+          <div className="lg:hidden mt-3 flex justify-center">
+            <DisplayToggle displayMode={displayMode} onDisplayModeChange={setDisplayMode} />
           </div>
 
           {/* Desktop: Full Filters */}

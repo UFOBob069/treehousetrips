@@ -35,6 +35,9 @@ export interface Property {
   description: string
   location: string
   exactAddress?: string
+  city?: string
+  state?: string
+  country?: string
   price: number
   contactEmail: string
   airbnbUrl?: string
@@ -90,8 +93,13 @@ export interface Booking {
 // Property operations
 export const createProperty = async (propertyData: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>) => {
   try {
+    // Filter out undefined values as Firestore doesn't accept them
+    const cleanedData = Object.fromEntries(
+      Object.entries(propertyData).filter(([_, value]) => value !== undefined)
+    )
+    
     const docRef = await addDoc(collection(db, COLLECTIONS.PROPERTIES), {
-      ...propertyData,
+      ...cleanedData,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
