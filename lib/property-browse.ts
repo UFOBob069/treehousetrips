@@ -1,5 +1,6 @@
 export interface BrowseProperty {
   id: string
+  slug?: string
   name: string
   description: string
   location: string
@@ -34,7 +35,7 @@ export const BROWSE_CATEGORIES = [
   { id: 'luxury', label: 'Luxury', icon: '💎', tags: ['Luxury'] },
   { id: 'romantic', label: 'Romantic', icon: '💕', tags: ['Romantic'] },
   { id: 'family', label: 'Family', icon: '👨‍👩‍👧', tags: ['Family-Friendly'] },
-  { id: 'stargazing', label: 'Stargazing', icon: '🌌', tags: ['Romantic', 'Off-the-Grid'] },
+  { id: 'stargazing', label: 'Stargazing', icon: '🌌', tags: ['Stargazing', 'Romantic', 'Off-the-Grid'] },
 ] as const
 
 const EMOTIONAL_BY_TAG: Record<string, string> = {
@@ -44,10 +45,21 @@ const EMOTIONAL_BY_TAG: Record<string, string> = {
   'Eco-Friendly': 'Forest canopy views',
   'Hot Tub': 'Great rainy weekend stay',
   'Family-Friendly': 'Kids love this one',
+  Stargazing: 'Fall asleep under the stars',
   Adventure: 'Built for explorers',
   'Zip Line': 'Adventure at your doorstep',
   Redwoods: 'Ancient redwood setting',
   'Solar Powered': 'Sun-powered serenity',
+}
+
+export function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
 }
 
 export function parsePrice(price: string): number {

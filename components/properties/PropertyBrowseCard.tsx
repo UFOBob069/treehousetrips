@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { MapPin, Users, Bed, Bath, Heart } from 'lucide-react'
 import type { BrowseProperty } from '@/lib/property-browse'
-import { getEmotionalDescriptor } from '@/lib/property-browse'
+import { getEmotionalDescriptor, slugify } from '@/lib/property-browse'
 import PropertyImageCarousel from './PropertyImageCarousel'
 
 interface PropertyBrowseCardProps {
@@ -23,6 +23,7 @@ export default function PropertyBrowseCard({
 }: PropertyBrowseCardProps) {
   const descriptor = getEmotionalDescriptor(property)
   const isGrid = viewMode === 'grid'
+  const href = `/properties/${property.slug || slugify(property.name) || property.id}`
 
   const imageBlock = (
     <div className={`relative ${isGrid ? '' : 'sm:w-[42%] shrink-0'}`}>
@@ -111,7 +112,7 @@ export default function PropertyBrowseCard({
 
   return (
     <Link
-      href={`/properties/${property.id}`}
+      href={href}
       className={`group/card block overflow-hidden rounded-2xl bg-white border border-stone-200/80 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 ${
         isHighlighted ? 'ring-2 ring-forest-500 ring-offset-2' : ''
       } ${isGrid ? '' : 'sm:flex'}`}

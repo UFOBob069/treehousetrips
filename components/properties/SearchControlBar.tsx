@@ -73,18 +73,19 @@ export default function SearchControlBar({
                 </select>
               </div>
 
-              <div className="relative">
-                <PawPrint className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
-                <select
-                  value={petsOnly ? 'yes' : 'any'}
-                  onChange={(e) => onPetsChange(e.target.value === 'yes')}
-                  className="appearance-none rounded-full border border-stone-200 bg-white py-2.5 pl-9 pr-8 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-forest-600/30 min-w-[120px]"
-                  aria-label="Pets"
-                >
-                  <option value="any">Any pets</option>
-                  <option value="yes">Pet-friendly</option>
-                </select>
-              </div>
+              <button
+                type="button"
+                onClick={() => onPetsChange(!petsOnly)}
+                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${
+                  petsOnly
+                    ? 'border-forest-700 bg-forest-800 text-white'
+                    : 'border-stone-200 bg-white text-stone-700 hover:border-forest-300 hover:bg-forest-50'
+                }`}
+                aria-pressed={petsOnly}
+              >
+                <PawPrint className="h-4 w-4" />
+                Pet-friendly
+              </button>
             </div>
           </div>
 

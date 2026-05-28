@@ -152,35 +152,52 @@ export default function PropertiesPage() {
         ) : filtered.length === 0 ? (
           emptyState
         ) : view === 'map' ? (
-          <>
-            <div className="lg:hidden relative">
-              <div className="h-[calc(100vh-220px)] min-h-[400px] rounded-2xl overflow-hidden border border-stone-200/80 shadow-lg mb-6">
-                <MapView
-                  properties={properties}
-                  visibleProperties={filtered}
-                  selectedProperty={selectedProperty}
-                  hoveredProperty={hoveredProperty}
-                  onPropertySelect={setSelectedProperty}
-                />
-              </div>
-              <div className="space-y-4 pb-8">{resultsGrid}</div>
-            </div>
+          <div className="pb-8">
+            <div className="relative h-[calc(100vh-260px)] min-h-[520px] rounded-2xl overflow-hidden border border-stone-200/80 shadow-lg">
+              <MapView
+                properties={properties}
+                visibleProperties={filtered}
+                selectedProperty={selectedProperty}
+                hoveredProperty={hoveredProperty}
+                onPropertySelect={setSelectedProperty}
+              />
 
-            <div className="hidden lg:flex gap-6 pb-12">
-              <div className="w-[58%] max-h-[calc(100vh-200px)] overflow-y-auto pr-2 space-y-5 scrollbar-thin">
-                {resultsGrid}
-              </div>
-              <div className="w-[42%] sticky top-[148px] h-[calc(100vh-200px)] rounded-2xl overflow-hidden border border-stone-200/80 shadow-lg">
-                <MapView
-                  properties={properties}
-                  visibleProperties={filtered}
-                  selectedProperty={selectedProperty}
-                  hoveredProperty={hoveredProperty}
-                  onPropertySelect={setSelectedProperty}
-                />
+              {/* Bottom overlay cards */} 
+              <div className="absolute inset-x-0 bottom-0 z-20">
+                <div className="pointer-events-none h-16 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                <div className="pointer-events-auto bg-[#faf8f5]/90 backdrop-blur-md border-t border-stone-200/80">
+                  <div className="flex gap-3 overflow-x-auto px-4 py-3 scrollbar-hide">
+                    {filtered.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onMouseEnter={() => setHoveredProperty(p)}
+                        onMouseLeave={() => setHoveredProperty(null)}
+                        onClick={() => setSelectedProperty(p)}
+                        className={`shrink-0 w-[260px] rounded-xl border bg-white text-left shadow-sm hover:shadow-md transition-all overflow-hidden ${
+                          selectedProperty?.id === p.id
+                            ? 'border-forest-600 ring-2 ring-forest-500/30'
+                            : 'border-stone-200'
+                        }`}
+                      >
+                        <div className="flex">
+                          <div className="relative h-[86px] w-[110px] bg-stone-100">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={p.images?.[0]} alt="" className="h-full w-full object-cover" />
+                          </div>
+                          <div className="p-3 flex-1">
+                            <div className="text-xs font-semibold text-forest-700">{p.price}</div>
+                            <div className="font-serif text-sm text-forest-950 line-clamp-1">{p.name}</div>
+                            <div className="text-xs text-stone-600 line-clamp-1">{p.location}</div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-          </>
+          </div>
         ) : (
           <div className="pb-12">
             {resultsGrid}

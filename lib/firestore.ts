@@ -32,6 +32,7 @@ export function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
 
 const PROPERTY_WRITE_KEYS = [
   'title',
+  'slug',
   'description',
   'location',
   'exactAddress',
@@ -100,6 +101,7 @@ export const COLLECTIONS = {
 export interface Property {
   id?: string
   title: string
+  slug?: string
   description: string
   location: string
   exactAddress?: string

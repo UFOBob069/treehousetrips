@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { createProperty, Property } from '@/lib/firestore'
 import { MapPin, Link, Edit3, Save, Eye, Loader2, CheckCircle, AlertCircle, ArrowRight, ChevronLeft } from 'lucide-react'
 import AddressAutocomplete from './AddressAutocomplete'
+import { BROWSE_CATEGORIES, slugify } from '@/lib/property-browse'
 
 interface ScrapedData {
   title: string
@@ -32,6 +33,7 @@ interface HostOnboardingFormProps {
 
 interface ListingFormData {
   title: string
+  slug: string
   description: string
   location: string
   exactAddress: string
@@ -55,6 +57,7 @@ interface ListingFormData {
 
 const createEmptyFormData = (email = ''): ListingFormData => ({
   title: '',
+  slug: '',
   description: '',
   location: '',
   exactAddress: '',
@@ -87,6 +90,16 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
   const [formData, setFormData] = useState<ListingFormData>(() =>
     createEmptyFormData(user?.email || '')
   )
+
+  const toggleTag = (tag: string) => {
+    setFormData((prev) => {
+      const exists = prev.tags.includes(tag)
+      return {
+        ...prev,
+        tags: exists ? prev.tags.filter((t) => t !== tag) : [...prev.tags, tag],
+      }
+    })
+  }
 
   const handleScrape = async () => {
     if (!airbnbUrl) return
@@ -194,6 +207,7 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
       
       const propertyData: Omit<Property, 'id' | 'createdAt' | 'updatedAt'> = {
         title: formData.title.trim(),
+        ...(formData.slug.trim() ? { slug: slugify(formData.slug) } : {}),
         description: formData.description.trim(),
         location: formData.location.trim(),
         price: formData.price,
@@ -428,9 +442,45 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
                   <input
                     type="text"
                     value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => {
+                        const title = e.target.value
+                        // If the user hasn't chosen a slug, keep it in sync with title.
+                        const shouldSyncSlug = !prev.slug.trim() || prev.slug.trim() === slugify(prev.title)
+                        return {
+                          ...prev,
+                          title,
+                          slug: shouldSyncSlug ? slugify(title) : prev.slug,
+                        }
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Page name (share link)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500 whitespace-nowrap hidden sm:inline">
+                      /properties/
+                    </span>
+                    <input
+                      type="text"
+                      value={formData.slug}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, slug: slugify(e.target.value) }))
+                      }
+                      placeholder="my-treehouse"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      inputMode="text"
+                      autoComplete="off"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    This becomes your shareable link: <span className="font-medium">/properties/{formData.slug || 'your-page-name'}</span>
+                  </p>
                 </div>
 
                 <div>
@@ -559,6 +609,34 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
 
                 {/* Amenities/Tags */}
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Priority categories
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    These are the main ways travelers browse. Select everything that fits.
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {BROWSE_CATEGORIES.map((cat) => {
+                      const primaryTag = cat.tags[0]
+                      const active = formData.tags.includes(primaryTag)
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => toggleTag(primaryTag)}
+                          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+                            active
+                              ? 'bg-forest-800 text-white border-forest-800'
+                              : 'bg-white border-gray-300 text-gray-700 hover:border-forest-400'
+                          }`}
+                        >
+                          <span aria-hidden>{cat.icon}</span>
+                          {cat.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+
                   <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {formData.tags.map((tag, index) => (
