@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import AuthModal from '@/components/AuthModal'
 import { ListingMode } from '@/components/ListingMethodChooser'
@@ -17,6 +17,8 @@ import HostStickyCTA from './HostStickyCTA'
 
 export default function HostLandingPage() {
   const router = useRouter()
+  const pathname = usePathname()
+  const onCreateRoute = pathname === '/create'
   const { user, loading: authLoading } = useAuth()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup')
@@ -36,7 +38,11 @@ export default function HostLandingPage() {
 
   const handleCreateListing = () => {
     if (user) {
-      router.push('/create')
+      if (onCreateRoute) {
+        scrollToGetStarted()
+      } else {
+        router.push('/create#get-started')
+      }
       return
     }
     setAuthMode('signup')
@@ -65,11 +71,14 @@ export default function HostLandingPage() {
   }, [])
 
   useEffect(() => {
-    if (user && showAuthModal) {
-      setShowAuthModal(false)
+    if (!user || !showAuthModal) return
+    setShowAuthModal(false)
+    if (onCreateRoute) {
       scrollToGetStarted()
+    } else {
+      router.push('/create#get-started')
     }
-  }, [user, showAuthModal, scrollToGetStarted])
+  }, [user, showAuthModal, onCreateRoute, scrollToGetStarted, router])
 
   return (
     <div className="bg-cream -mt-px">

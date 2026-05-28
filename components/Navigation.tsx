@@ -17,8 +17,10 @@ export default function Navigation() {
   const pathname = usePathname()
   const userMenuRef = useRef<HTMLDivElement>(null)
   const isBrowsePage = pathname?.startsWith('/properties')
+  const isHostMarketingRoute =
+    pathname === '/list-your-treehouse' || pathname === '/create'
   const isImmersiveLanding =
-    pathname === '/' || pathname === '/list-your-treehouse'
+    pathname === '/' || (isHostMarketingRoute && !user)
   const transparentNav = isImmersiveLanding && !scrolled
 
   useEffect(() => {

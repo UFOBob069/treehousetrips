@@ -4,15 +4,14 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import HostOnboardingForm from '@/components/HostOnboardingForm'
+import HostLandingPage from '@/components/host/HostLandingPage'
 import ListingMethodChooser, { ListingMode } from '@/components/ListingMethodChooser'
-import AuthModal from '@/components/AuthModal'
 import PaymentModal from '@/components/PaymentModal'
 
 function CreateListingContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [showAuthModal, setShowAuthModal] = useState(false)
   const [listingMode, setListingMode] = useState<ListingMode | null>(null)
   const [onboardingComplete, setOnboardingComplete] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
@@ -21,10 +20,10 @@ function CreateListingContent() {
 
   useEffect(() => {
     const mode = searchParams.get('mode')
-    if (mode === 'scratch' || mode === 'import') {
+    if (user && (mode === 'scratch' || mode === 'import')) {
       setListingMode(mode)
     }
-  }, [searchParams])
+  }, [searchParams, user])
 
   const handleSelectMode = (mode: ListingMode) => {
     setListingMode(mode)
@@ -38,64 +37,48 @@ function CreateListingContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-forest-200 border-t-forest-700" />
       </div>
     )
   }
 
+  // Guests see full host marketing + signup at bottom — not a sign-in wall
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h1>
-          <p className="text-gray-600 mb-6">You need to be signed in to list your treehouse.</p>
-          <button
-            onClick={() => setShowAuthModal(true)}
-            className="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors"
-          >
-            Sign In
-          </button>
-          <AuthModal
-            isOpen={showAuthModal}
-            onClose={() => setShowAuthModal(false)}
-            defaultMode="signup"
-          />
-        </div>
-      </div>
-    )
+    return <HostLandingPage />
   }
 
   if (onboardingComplete) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center p-6 bg-white rounded-lg shadow-lg">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="min-h-screen bg-cream flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center p-8 bg-[#fffcf7] rounded-3xl shadow-[0_20px_50px_rgba(26,43,26,0.1)]">
+          <div className="w-16 h-16 bg-forest-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-forest-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Listing Created Successfully!</h1>
-          <p className="text-gray-600 mb-6">Your treehouse listing has been submitted. Redirecting to your dashboard...</p>
-          <div className="flex justify-center space-x-4">
+          <h1 className="font-serif text-2xl text-forest-950 mb-3">Listing submitted</h1>
+          <p className="text-stone-600 mb-6 text-sm">
+            Your treehouse is on its way. Head to your dashboard to manage it.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
+              type="button"
               onClick={() => {
                 setOnboardingComplete(false)
                 setListingMode(null)
                 router.replace('/create')
               }}
-              className="bg-gray-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+              className="rounded-full bg-stone-200/80 px-6 py-3 text-sm font-medium text-stone-700 hover:bg-stone-300/80 transition-colors"
             >
-              Create Another Listing
+              Create another listing
             </button>
             <button
+              type="button"
               onClick={() => router.push('/dashboard')}
-              className="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+              className="rounded-full bg-forest-800 px-6 py-3 text-sm font-medium text-white hover:bg-forest-700 transition-colors"
             >
-              Go to Dashboard
+              Go to dashboard
             </button>
           </div>
         </div>
@@ -105,13 +88,21 @@ function CreateListingContent() {
 
   if (!listingMode) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-forest-50 to-primary-50 py-12 px-4">
-        <ListingMethodChooser
-          variant="prominent"
-          onSelect={handleSelectMode}
-          title="Start from scratch or import from Airbnb?"
-          subtitle="Pick one path below. You can always edit everything before publishing."
-        />
+      <div className="min-h-screen bg-cream py-12 md:py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-moss text-sm tracking-widest uppercase mb-2">Host onboarding</p>
+            <h1 className="font-serif text-3xl md:text-4xl text-forest-950 tracking-tight">
+              How would you like to build your listing?
+            </h1>
+          </div>
+          <ListingMethodChooser
+            variant="prominent"
+            onSelect={handleSelectMode}
+            title="Start from scratch or import from Airbnb?"
+            subtitle="Pick one path below. You can edit everything before publishing."
+          />
+        </div>
       </div>
     )
   }
@@ -147,8 +138,8 @@ export default function CreateListingPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="min-h-screen bg-cream flex items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-forest-200 border-t-forest-700" />
         </div>
       }
     >

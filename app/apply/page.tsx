@@ -143,7 +143,7 @@ export default function ApplyPage() {
         {/* Header */}
         <div className="mb-8">
           <Link 
-            href="/list-your-treehouse"
+            href="/create"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
           >
             <ArrowLeft size={20} />
