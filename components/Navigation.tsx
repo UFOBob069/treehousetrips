@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Menu, X, Search, User, LogOut, Settings, Home, MessageCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import AuthModal from './AuthModal'
@@ -13,7 +13,9 @@ export default function Navigation() {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const { user, signOut } = useAuth()
+  const pathname = usePathname()
   const userMenuRef = useRef<HTMLDivElement>(null)
+  const isBrowsePage = pathname?.startsWith('/properties')
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -39,17 +41,19 @@ export default function Navigation() {
             </Link>
           </div>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-lg mx-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="text"
-                placeholder="Search treehouses..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-transparent"
-              />
+          {/* Search lives on /properties browse bar */}
+          {!isBrowsePage && (
+            <div className="flex-1 max-w-lg mx-8 hidden md:block">
+              <Link
+                href="/properties"
+                className="relative flex items-center w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full text-sm text-gray-500 hover:border-forest-400 hover:bg-forest-50/50 transition-colors"
+              >
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                Search treehouses…
+              </Link>
             </div>
-          </div>
+          )}
+          {isBrowsePage && <div className="flex-1 hidden md:block" aria-hidden />}
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4">

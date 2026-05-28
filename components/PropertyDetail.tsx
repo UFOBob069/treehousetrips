@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Users, Bed, Bath, ExternalLink, MessageCircle, ArrowLeft, Heart, Share, Star, Shield, Wifi, Car, Coffee, Mountain, Waves } from 'lucide-react'
+import { MapPin, Users, Bed, Bath, ExternalLink, MessageCircle, ArrowLeft, Heart, Share, Star, Shield, Wifi, Car, Coffee, Mountain, Waves, Phone } from 'lucide-react'
 import TreehouseFeatures from './TreehouseFeatures'
 import TreehouseStats from './TreehouseStats'
 import TreehouseExperience from './TreehouseExperience'
@@ -28,6 +28,7 @@ interface Property {
   ownerId: string
   title: string
   contactEmail: string
+  contactPhone?: string
   exactAddress?: string
   isPublished: boolean
 }
@@ -239,6 +240,33 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                       <span className="font-medium">{property.bathrooms}</span>
                     </div>
                   </div>
+
+                  {(property.contactEmail || property.contactPhone) && (
+                    <div className="mt-4 pt-4 border-t border-gray-200 space-y-2 text-sm">
+                      {property.contactEmail && (
+                        <p className="text-gray-600">
+                          <span className="font-medium text-gray-800">Email:</span>{' '}
+                          <a
+                            href={`mailto:${property.contactEmail}`}
+                            className="text-forest-600 hover:underline"
+                          >
+                            {property.contactEmail}
+                          </a>
+                        </p>
+                      )}
+                      {property.contactPhone && (
+                        <p className="text-gray-600 flex items-center gap-1.5">
+                          <Phone size={14} className="text-gray-400 shrink-0" />
+                          <a
+                            href={`tel:${property.contactPhone.replace(/\s/g, '')}`}
+                            className="text-forest-600 hover:underline"
+                          >
+                            {property.contactPhone}
+                          </a>
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-3 mb-6">
@@ -278,6 +306,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           exactAddress: property.exactAddress,
           price: typeof property.price === 'string' ? parseInt(property.price.replace(/[^0-9]/g, '')) : property.price,
           contactEmail: property.contactEmail || property.hostEmail,
+          ...(property.contactPhone ? { contactPhone: property.contactPhone } : {}),
           airbnbUrl: property.airbnbUrl,
           images: property.images,
           tags: property.tags,

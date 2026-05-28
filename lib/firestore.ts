@@ -18,6 +18,74 @@ import {
 } from 'firebase/firestore'
 import { db } from './firebase'
 
+/** Firestore rejects `undefined` field values — omit those keys before writes. */
+export function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
+  const result = {} as T
+  for (const key of Object.keys(obj) as (keyof T)[]) {
+    const value = obj[key]
+    if (value !== undefined) {
+      result[key] = value
+    }
+  }
+  return result
+}
+
+const PROPERTY_WRITE_KEYS = [
+  'title',
+  'description',
+  'location',
+  'exactAddress',
+  'city',
+  'state',
+  'country',
+  'price',
+  'contactEmail',
+  'contactPhone',
+  'airbnbUrl',
+  'images',
+  'tags',
+  'guests',
+  'bedrooms',
+  'bathrooms',
+  'isPublished',
+  'isPaid',
+  'subscriptionStartDate',
+  'subscriptionEndDate',
+  'subscriptionStatus',
+  'stripePaymentId',
+  'stripeSubscriptionId',
+  'stripeCustomerId',
+  'ownerId',
+] as const
+
+/** Only pass defined, whitelisted property fields; lat/lng require both valid numbers. */
+export function sanitizePropertyForWrite(
+  data: Record<string, unknown>
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {}
+
+  for (const key of PROPERTY_WRITE_KEYS) {
+    const value = data[key]
+    if (value !== undefined) {
+      result[key] = value
+    }
+  }
+
+  const lat = data.lat
+  const lng = data.lng
+  if (
+    typeof lat === 'number' &&
+    typeof lng === 'number' &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng)
+  ) {
+    result.lat = lat
+    result.lng = lng
+  }
+
+  return result
+}
+
 // Collection names
 export const COLLECTIONS = {
   PROPERTIES: 'properties',
@@ -40,6 +108,7 @@ export interface Property {
   country?: string
   price: number
   contactEmail: string
+  contactPhone?: string
   airbnbUrl?: string
   images: string[]
   tags: string[]
@@ -93,13 +162,8 @@ export interface Booking {
 // Property operations
 export const createProperty = async (propertyData: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>) => {
   try {
-    // Filter out undefined values as Firestore doesn't accept them
-    const cleanedData = Object.fromEntries(
-      Object.entries(propertyData).filter(([_, value]) => value !== undefined)
-    )
-    
     const docRef = await addDoc(collection(db, COLLECTIONS.PROPERTIES), {
-      ...cleanedData,
+      ...sanitizePropertyForWrite(propertyData as Record<string, unknown>),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
@@ -162,7 +226,7 @@ export const updateProperty = async (id: string, updates: Partial<Property>) => 
   try {
     const docRef = doc(db, COLLECTIONS.PROPERTIES, id)
     await updateDoc(docRef, {
-      ...updates,
+      ...sanitizePropertyForWrite(updates as Record<string, unknown>),
       updatedAt: serverTimestamp(),
     })
     return { error: null }

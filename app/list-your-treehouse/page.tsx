@@ -1,14 +1,29 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Check, DollarSign, Users, Shield, Star, TrendingUp, Mail, Phone } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
+import ListingMethodChooser, { ListingMode } from '@/components/ListingMethodChooser'
+import AuthModal from '@/components/AuthModal'
 
 export default function ListYourTreehousePage() {
+  const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const [showApplication, setShowApplication] = useState(false)
   const [showLearnMore, setShowLearnMore] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+
+  const handleSelectListingMode = (mode: ListingMode) => {
+    router.push(`/create?mode=${mode}`)
+  }
 
   const handleApplyToHost = () => {
-    window.location.href = '/apply'
+    if (user) {
+      router.push('/create')
+      return
+    }
+    setShowAuthModal(true)
   }
 
   const handleLearnMore = () => {
@@ -228,6 +243,12 @@ export default function ListYourTreehousePage() {
           </div>
         </div>
       )}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        defaultMode="signup"
+      />
+
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-forest-50 to-primary-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -235,24 +256,44 @@ export default function ListYourTreehousePage() {
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Share Your <span className="text-forest-600">Treehouse</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8">
-              Join our exclusive network of exceptional treehouse owners and earn premium rates 
-              from discerning travelers who value unique experiences.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
-                onClick={handleApplyToHost}
-                className="bg-forest-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-forest-700 transition-colors"
-              >
-                Apply to List Your Property
-              </button>
-              <button 
-                onClick={handleLearnMore}
-                className="bg-white text-forest-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 transition-colors border-2 border-forest-600"
-              >
-                Learn More
-              </button>
-            </div>
+            {authLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-forest-600"></div>
+              </div>
+            ) : user ? (
+              <div className="mt-2 text-left">
+                <p className="text-center text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+                  You are signed in — choose how you want to create your listing.
+                </p>
+                <ListingMethodChooser
+                  variant="prominent"
+                  onSelect={handleSelectListingMode}
+                  title="Start from scratch or import from Airbnb?"
+                  subtitle="Pick one path below. You can always edit everything before publishing."
+                />
+              </div>
+            ) : (
+              <>
+                <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8">
+                  Join our exclusive network of exceptional treehouse owners and earn premium rates
+                  from discerning travelers who value unique experiences.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button
+                    onClick={handleApplyToHost}
+                    className="bg-forest-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-forest-700 transition-colors"
+                  >
+                    Sign Up to List Your Property
+                  </button>
+                  <button
+                    onClick={handleLearnMore}
+                    className="bg-white text-forest-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 transition-colors border-2 border-forest-600"
+                  >
+                    Learn More
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -551,14 +592,14 @@ export default function ListYourTreehousePage() {
             Join our exclusive network and start earning premium rates from quality travelers.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={handleEmailContact}
+            <button
+              onClick={handleApplyToHost}
               className="bg-white text-forest-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
             >
               <Mail size={20} />
-              Submit Application
+              {user ? 'Create Your Listing' : 'Get Started'}
             </button>
-            <button 
+            <button
               onClick={handleScheduleCall}
               className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-forest-600 transition-colors flex items-center justify-center gap-2"
             >

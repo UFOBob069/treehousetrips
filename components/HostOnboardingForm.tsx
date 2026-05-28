@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { createProperty, Property } from '@/lib/firestore'
-import { MapPin, Link, Edit3, Save, Eye, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { MapPin, Link, Edit3, Save, Eye, Loader2, CheckCircle, AlertCircle, ArrowRight, ChevronLeft } from 'lucide-react'
 import AddressAutocomplete from './AddressAutocomplete'
 
 interface ScrapedData {
@@ -25,12 +25,14 @@ interface ScrapedData {
 }
 
 interface HostOnboardingFormProps {
+  mode: 'import' | 'scratch'
   onSuccess: (propertyTitle: string, propertyId: string) => void
+  onBack?: () => void
 }
 
-export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProps) {
-  const { user, firestoreUser } = useAuth()
-  const [step, setStep] = useState<'url' | 'edit' | 'preview'>('url')
+export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnboardingFormProps) {
+  const { user } = useAuth()
+  const [step, setStep] = useState<'url' | 'edit' | 'preview'>(mode === 'scratch' ? 'edit' : 'url')
   const [airbnbUrl, setAirbnbUrl] = useState('')
   const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null)
   const [editedData, setEditedData] = useState<Partial<Property>>({})
@@ -46,6 +48,7 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
     exactAddress: '',
     price: 0,
     contactEmail: user?.email || '',
+    contactPhone: '',
     airbnbUrl: '',
     images: [] as string[],
     tags: [] as string[],
@@ -54,8 +57,6 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
     bathrooms: 0,
     rating: 0,
     reviewCount: 0,
-    lat: undefined as number | undefined,
-    lng: undefined as number | undefined,
     isPublished: false,
     isPaid: false,
     subscriptionStatus: 'pending' as 'active' | 'expired' | 'pending'
@@ -137,13 +138,17 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
         bathrooms: result.data.bathrooms,
         rating: result.data.rating,
         reviewCount: result.data.reviewCount,
-        lat: result.data.lat,
-        lng: result.data.lng,
         isPublished: false,
         isPaid: false,
-        subscriptionStatus: 'pending'
+        subscriptionStatus: 'pending',
+        ...(typeof result.data.lat === 'number' &&
+        typeof result.data.lng === 'number' &&
+        Number.isFinite(result.data.lat) &&
+        Number.isFinite(result.data.lng)
+          ? { lat: result.data.lat, lng: result.data.lng }
+          : {}),
       })
-      
+
       setStep('edit')
     } catch (err) {
       setError('Failed to scrape Airbnb listing. Please try again.')
@@ -164,15 +169,34 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
     try {
       console.log('Submitting property with data:', formData)
       
-      const propertyData = {
-        ...formData,
-        ownerId: user.uid,
+      const propertyData: Omit<Property, 'id' | 'createdAt' | 'updatedAt'> = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        location: formData.location.trim(),
+        price: formData.price,
+        contactEmail: formData.contactEmail.trim(),
+        images: formData.images.filter(img => img.trim() !== ''),
         tags: formData.tags.filter(tag => tag.trim() !== ''),
-        images: formData.images.filter(img => img.trim() !== '')
+        guests: formData.guests,
+        bedrooms: formData.bedrooms,
+        bathrooms: formData.bathrooms,
+        isPublished: formData.isPublished,
+        isPaid: formData.isPaid,
+        ownerId: user.uid,
+        ...(formData.exactAddress.trim() ? { exactAddress: formData.exactAddress.trim() } : {}),
+        ...(formData.contactPhone.trim() ? { contactPhone: formData.contactPhone.trim() } : {}),
+        ...(formData.airbnbUrl.trim() ? { airbnbUrl: formData.airbnbUrl.trim() } : {}),
+        ...(formData.subscriptionStatus ? { subscriptionStatus: formData.subscriptionStatus } : {}),
+        ...(typeof formData.lat === 'number' &&
+        typeof formData.lng === 'number' &&
+        !Number.isNaN(formData.lat) &&
+        !Number.isNaN(formData.lng)
+          ? { lat: formData.lat, lng: formData.lng }
+          : {}),
       }
-      
+
       console.log('Property data to submit:', propertyData)
-      
+
       const { id, error } = await createProperty(propertyData)
       
       console.log('Create property result:', { id, error })
@@ -245,30 +269,49 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4">
-          <h1 className="text-2xl font-bold text-white">Host Onboarding</h1>
-          <p className="text-primary-100">Import your Airbnb listing and customize it for Treehouse Trips</p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Create Your Listing</h1>
+              <p className="text-primary-100">
+                {mode === 'import'
+                  ? 'Import your Airbnb listing and customize it for Treehouse Trips'
+                  : 'Fill in your treehouse details step by step'}
+              </p>
+            </div>
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="text-sm text-primary-100 hover:text-white underline shrink-0"
+              >
+                Change method
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Progress Steps */}
         <div className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
-            <div className={`flex items-center ${step === 'url' ? 'text-primary-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'url' ? 'bg-primary-600 text-white' : 'bg-gray-200'}`}>
-                1
+            {mode === 'import' && (
+              <div className={`flex items-center ${step === 'url' ? 'text-primary-600' : 'text-gray-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'url' ? 'bg-primary-600 text-white' : 'bg-gray-200'}`}>
+                  1
+                </div>
+                <span className="ml-2 font-medium hidden sm:inline">Import</span>
               </div>
-              <span className="ml-2 font-medium">Import Listing</span>
-            </div>
+            )}
             <div className={`flex items-center ${step === 'edit' ? 'text-primary-600' : 'text-gray-400'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'edit' ? 'bg-primary-600 text-white' : 'bg-gray-200'}`}>
-                2
+                {mode === 'import' ? 2 : 1}
               </div>
-              <span className="ml-2 font-medium">Edit Details</span>
+              <span className="ml-2 font-medium hidden sm:inline">Details</span>
             </div>
             <div className={`flex items-center ${step === 'preview' ? 'text-primary-600' : 'text-gray-400'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'preview' ? 'bg-primary-600 text-white' : 'bg-gray-200'}`}>
-                3
+                {mode === 'import' ? 3 : 2}
               </div>
-              <span className="ml-2 font-medium">Preview & Submit</span>
+              <span className="ml-2 font-medium hidden sm:inline">Preview</span>
             </div>
           </div>
         </div>
@@ -308,14 +351,6 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
                   </button>
                 </div>
                 
-                <div className="mt-4 text-center">
-                  <button
-                    onClick={() => setStep('edit')}
-                    className="text-sm text-gray-600 hover:text-gray-800 underline"
-                  >
-                    Skip import and enter details manually
-                  </button>
-                </div>
               </div>
 
               {error && (
@@ -349,20 +384,18 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
         )}
 
         {/* Step 2: Edit Form */}
-        {step === 'edit' && scrapedData && (
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Edit Your Listing</h2>
-              <button
-                onClick={() => setStep('preview')}
-                className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Preview
-              </button>
+        {step === 'edit' && (
+          <div className="p-6 pb-0">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {mode === 'scratch' ? 'Your Listing Details' : 'Edit Your Listing'}
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Fill in your property information, then continue to preview when you are ready.
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
               {/* Basic Information */}
               <div className="space-y-4">
                 <h3 className="font-medium text-gray-900">Basic Information</h3>
@@ -404,12 +437,14 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
                   <AddressAutocomplete
                     value={formData.exactAddress}
                     onChange={(address, coordinates) => {
-                      setFormData(prev => ({ 
-                        ...prev, 
-                        exactAddress: address,
-                        lat: coordinates?.[1],
-                        lng: coordinates?.[0]
-                      }))
+                      setFormData((prev) => {
+                        const next = { ...prev, exactAddress: address }
+                        if (coordinates) {
+                          next.lat = coordinates[1]
+                          next.lng = coordinates[0]
+                        }
+                        return next
+                      })
                     }}
                     placeholder="Start typing your address..."
                     className=""
@@ -419,31 +454,48 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Price per night</label>
-                    <input
-                      type="text"
-                      value={formData.price === 0 ? '' : formData.price.toString()}
-                      onChange={(e) => {
-                        const value = e.target.value
-                        setFormData(prev => ({ 
-                          ...prev, 
-                          price: value === '' ? 0 : parseInt(value) || 0 
-                        }))
-                      }}
-                      placeholder="Enter price"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-                    <input
-                      type="email"
-                      value={formData.contactEmail}
-                      onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price per night</label>
+                  <input
+                    type="text"
+                    value={formData.price === 0 ? '' : formData.price.toString()}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setFormData(prev => ({
+                        ...prev,
+                        price: value === '' ? 0 : parseInt(value) || 0,
+                      }))
+                    }}
+                    placeholder="Enter price"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  <h4 className="text-sm font-medium text-gray-900">Contact information</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact email</label>
+                      <input
+                        type="email"
+                        value={formData.contactEmail}
+                        onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact phone</label>
+                      <input
+                        type="tel"
+                        value={formData.contactPhone}
+                        onChange={(e) => setFormData(prev => ({ ...prev, contactPhone: e.target.value }))}
+                        placeholder="+1 (555) 123-4567"
+                        autoComplete="tel"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Optional — shown to guests who contact you</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -548,6 +600,31 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
                 </div>
               </div>
             </div>
+
+            {/* Step actions — preview CTA at bottom of form */}
+            <div className="sticky bottom-0 -mx-6 mt-2 px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+              {mode === 'import' ? (
+                <button
+                  type="button"
+                  onClick={() => setStep('url')}
+                  className="inline-flex items-center justify-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Back to Airbnb import
+                </button>
+              ) : (
+                <span className="hidden sm:block" />
+              )}
+              <button
+                type="button"
+                onClick={() => setStep('preview')}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 shadow-sm"
+              >
+                <Eye className="h-5 w-5" />
+                Continue to preview
+                <ArrowRight className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         )}
 
@@ -580,7 +657,19 @@ export default function HostOnboardingForm({ onSuccess }: HostOnboardingFormProp
                     </div>
                   )}
                   <div className="text-2xl font-bold text-primary-600">${formData.price}/night</div>
-                  
+                  <div className="mt-4 space-y-1 text-sm text-gray-600">
+                    <p>
+                      <span className="font-medium text-gray-700">Email:</span>{' '}
+                      {formData.contactEmail || '—'}
+                    </p>
+                    {formData.contactPhone.trim() && (
+                      <p>
+                        <span className="font-medium text-gray-700">Phone:</span>{' '}
+                        {formData.contactPhone}
+                      </p>
+                    )}
+                  </div>
+
                   {/* Rating and Reviews */}
                   {(formData.rating > 0 || formData.reviewCount > 0) && (
                     <div className="flex items-center mt-4">

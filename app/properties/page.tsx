@@ -1,331 +1,212 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import PropertyCard from '@/components/PropertyCard'
-import TagFilter from '@/components/TagFilter'
-import ToggleSwitch from '@/components/ToggleSwitch'
-import DisplayToggle from '@/components/DisplayToggle'
+import { useState, useEffect, useMemo } from 'react'
 import MapView from '@/components/MapView'
-import MobileFilterDropdown from '@/components/MobileFilterDropdown'
-
-interface Property {
-  id: string
-  name: string
-  description: string
-  location: string
-  lat: number
-  lng: number
-  airbnbUrl: string
-  hostEmail: string
-  images: string[]
-  tags: string[]
-  price: string
-  guests: number
-  bedrooms: number
-  bathrooms: number
-}
+import SearchControlBar from '@/components/properties/SearchControlBar'
+import CategoryScroller from '@/components/properties/CategoryScroller'
+import ResultsHeader from '@/components/properties/ResultsHeader'
+import MoreFiltersPanel from '@/components/properties/MoreFiltersPanel'
+import PropertyBrowseCard from '@/components/properties/PropertyBrowseCard'
+import {
+  type BrowseProperty,
+  type BrowseView,
+  type SortOption,
+  filterBrowseProperties,
+  sortBrowseProperties,
+  getAllTags,
+} from '@/lib/property-browse'
+import { Map } from 'lucide-react'
 
 export default function PropertiesPage() {
-  const [properties, setProperties] = useState<Property[]>([])
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([])
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [guestFilter, setGuestFilter] = useState<number | null>(null)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [displayMode, setDisplayMode] = useState<'map' | 'table'>('table')
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
-  const [hoveredProperty, setHoveredProperty] = useState<Property | null>(null)
-  const [allTags, setAllTags] = useState<string[]>([])
+  const [properties, setProperties] = useState<BrowseProperty[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedSecondary, setSelectedSecondary] = useState<string[]>([])
+  const [guestMin, setGuestMin] = useState<number | null>(null)
+  const [petsOnly, setPetsOnly] = useState(false)
+  const [sort, setSort] = useState<SortOption>('recommended')
+  const [view, setView] = useState<BrowseView>('grid')
+  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false)
+
+  const [selectedProperty, setSelectedProperty] = useState<BrowseProperty | null>(null)
+  const [hoveredProperty, setHoveredProperty] = useState<BrowseProperty | null>(null)
+
   useEffect(() => {
-    // Load properties from JSON file
-    const loadProperties = async () => {
+    const load = async () => {
       try {
-        const response = await fetch('/data/properties.json')
-        if (!response.ok) {
-          throw new Error('Failed to fetch properties')
-        }
-        const data = await response.json()
-
-        // Validate data structure
-        if (Array.isArray(data)) {
-          setProperties(data)
-          setFilteredProperties(data)
-
-          // Extract all unique tags
-          const tags = Array.from(new Set(data.flatMap((p: Property) => p.tags || [])))
-          setAllTags(tags)
-        } else {
-          console.error('Invalid data format:', data)
-          setProperties([])
-          setFilteredProperties([])
-        }
-      } catch (error) {
-        console.error('Error loading properties:', error)
+        const res = await fetch('/data/properties.json')
+        if (!res.ok) throw new Error('Failed to load')
+        const data = await res.json()
+        setProperties(Array.isArray(data) ? data : [])
+      } catch (e) {
+        console.error(e)
         setProperties([])
-        setFilteredProperties([])
       } finally {
         setIsLoading(false)
       }
     }
-
-    loadProperties()
+    load()
   }, [])
 
-  useEffect(() => {
-    let filtered = properties
+  const allSecondaryTags = useMemo(() => getAllTags(properties), [properties])
 
-    // Filter by selected tags
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter(property =>
-        selectedTags.some(tag => property.tags.includes(tag))
-      )
-    }
+  const filtered = useMemo(() => {
+    const list = filterBrowseProperties(properties, {
+      searchQuery,
+      selectedCategories,
+      guestMin,
+      petsOnly,
+      secondaryTags: selectedSecondary,
+    })
+    return sortBrowseProperties(list, sort)
+  }, [properties, searchQuery, selectedCategories, selectedSecondary, guestMin, petsOnly, sort])
 
-    // Filter by guest count
-    if (guestFilter !== null) {
-      filtered = filtered.filter(property => property.guests >= guestFilter)
-    }
+  const activeFilterCount =
+    selectedCategories.length + selectedSecondary.length + (petsOnly ? 1 : 0)
 
-    setFilteredProperties(filtered)
-  }, [properties, selectedTags, guestFilter])
-
-  const handleTagToggle = (tag: string) => {
-    setSelectedTags(prev =>
-      prev.includes(tag)
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+  const toggleCategory = (id: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Fixed Filters */}
-      <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-3">
-          {/* Mobile: Filter Dropdown */}
-          <MobileFilterDropdown
-            allTags={allTags}
-            selectedTags={selectedTags}
-            onTagToggle={handleTagToggle}
-            guestFilter={guestFilter}
-            onGuestFilterChange={setGuestFilter}
-            filteredCount={filteredProperties.length}
-          />
-          
-          {/* Mobile: View Toggle */}
-          <div className="lg:hidden mt-3 flex justify-center">
-            <DisplayToggle displayMode={displayMode} onDisplayModeChange={setDisplayMode} />
-          </div>
+  const toggleSecondary = (tag: string) => {
+    setSelectedSecondary((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    )
+  }
 
-          {/* Desktop: Full Filters */}
-          <div className="hidden lg:flex lg:items-center lg:justify-between gap-3">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Filter by features:</h4>
-                <TagFilter 
-                  tags={allTags} 
-                  selectedTags={selectedTags} 
-                  onTagToggle={handleTagToggle} 
+  const clearAllFilters = () => {
+    setSearchQuery('')
+    setSelectedCategories([])
+    setSelectedSecondary([])
+    setGuestMin(null)
+    setPetsOnly(false)
+  }
+
+  const emptyState = (
+    <div className="text-center py-16 px-4">
+      <p className="font-serif text-xl text-forest-900 mb-2">No treehouses match your search</p>
+      <p className="text-stone-600 text-sm mb-6 max-w-md mx-auto">
+        Try clearing filters or searching a broader destination — Oregon, redwoods, romantic, or
+        family-friendly.
+      </p>
+      <button
+        type="button"
+        onClick={clearAllFilters}
+        className="rounded-full bg-forest-800 px-6 py-2.5 text-sm font-medium text-white hover:bg-forest-900"
+      >
+        Clear all filters
+      </button>
+    </div>
+  )
+
+  const resultsGrid = (
+    <div
+      className={
+        view === 'grid'
+          ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5'
+          : 'flex flex-col gap-5'
+      }
+    >
+      {filtered.map((property) => (
+        <div
+          key={property.id}
+          onMouseEnter={() => setHoveredProperty(property)}
+          onMouseLeave={() => setHoveredProperty(null)}
+        >
+          <PropertyBrowseCard
+            property={property}
+            viewMode={view === 'list' ? 'list' : 'grid'}
+            isHighlighted={hoveredProperty?.id === property.id}
+          />
+        </div>
+      ))}
+    </div>
+  )
+
+  return (
+    <div className="min-h-screen bg-[#f5f2ec]">
+      <SearchControlBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        guestMin={guestMin}
+        onGuestChange={setGuestMin}
+        petsOnly={petsOnly}
+        onPetsChange={setPetsOnly}
+        view={view}
+        onViewChange={setView}
+        onMoreFilters={() => setMoreFiltersOpen(true)}
+        activeFilterCount={activeFilterCount}
+      />
+
+      <CategoryScroller selected={selectedCategories} onToggle={toggleCategory} />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ResultsHeader count={filtered.length} sort={sort} onSortChange={setSort} />
+
+        {isLoading ? (
+          <div className="py-20 text-center text-stone-500">Discovering treehouses…</div>
+        ) : filtered.length === 0 ? (
+          emptyState
+        ) : view === 'map' ? (
+          <>
+            <div className="lg:hidden relative">
+              <div className="h-[calc(100vh-220px)] min-h-[400px] rounded-2xl overflow-hidden border border-stone-200/80 shadow-lg mb-6">
+                <MapView
+                  properties={properties}
+                  visibleProperties={filtered}
+                  selectedProperty={selectedProperty}
+                  hoveredProperty={hoveredProperty}
+                  onPropertySelect={setSelectedProperty}
                 />
               </div>
-              
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Guests:</h4>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setGuestFilter(null)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      guestFilter === null
-                        ? 'bg-forest-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    Any
-                  </button>
-                  {[1, 2, 4, 6, 8].map((guests) => (
-                    <button
-                      key={guests}
-                      onClick={() => setGuestFilter(guests)}
-                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                        guestFilter === guests
-                          ? 'bg-forest-600 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      {guests}+
-                    </button>
-                  ))}
-                </div>
+              <div className="space-y-4 pb-8">{resultsGrid}</div>
+            </div>
+
+            <div className="hidden lg:flex gap-6 pb-12">
+              <div className="w-[58%] max-h-[calc(100vh-200px)] overflow-y-auto pr-2 space-y-5 scrollbar-thin">
+                {resultsGrid}
+              </div>
+              <div className="w-[42%] sticky top-[148px] h-[calc(100vh-200px)] rounded-2xl overflow-hidden border border-stone-200/80 shadow-lg">
+                <MapView
+                  properties={properties}
+                  visibleProperties={filtered}
+                  selectedProperty={selectedProperty}
+                  hoveredProperty={hoveredProperty}
+                  onPropertySelect={setSelectedProperty}
+                />
               </div>
             </div>
-            
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-700">
-                {filteredProperties.length} propert{filteredProperties.length !== 1 ? 'ies' : 'y'} found
-              </span>
-              <DisplayToggle displayMode={displayMode} onDisplayModeChange={setDisplayMode} />
-              {displayMode === 'table' && (
-                <ToggleSwitch viewMode={viewMode} onViewModeChange={setViewMode} />
-              )}
+          </>
+        ) : (
+          <div className="pb-12">
+            {resultsGrid}
+            <div className="lg:hidden fixed bottom-6 right-4 z-30">
+              <button
+                type="button"
+                onClick={() => setView('map')}
+                className="inline-flex items-center gap-2 rounded-full bg-forest-900 px-5 py-3 text-sm font-semibold text-white shadow-xl"
+              >
+                <Map className="h-4 w-4" />
+                Map
+              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {displayMode === 'map' ? (
-        /* Airbnb-style Layout */
-        <div className="relative">
-          {/* Mobile: Full Screen Map OR List */}
-          <div className="lg:hidden">
-            <div className="h-[calc(100vh-200px)]">
-              <MapView
-                properties={properties}
-                visibleProperties={filteredProperties}
-                selectedProperty={selectedProperty}
-                hoveredProperty={hoveredProperty}
-                onPropertySelect={setSelectedProperty}
-              />
-            </div>
-          </div>
-
-          {/* Desktop: Split View */}
-          <div className="hidden lg:flex">
-            {/* Left Side - Scrollable Property Grid */}
-            <div className="w-[65%] bg-white">
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {filteredProperties.length} treehouse{filteredProperties.length !== 1 ? 's' : ''} found
-                  </h3>
-                  <ToggleSwitch viewMode={viewMode} onViewModeChange={setViewMode} />
-                </div>
-              
-              {isLoading ? (
-                <div className="text-center py-12">
-                  <div className="text-gray-500 text-lg">Loading properties...</div>
-                </div>
-              ) : filteredProperties.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-gray-500 text-lg">No properties found matching your criteria.</div>
-                  <button
-                    onClick={() => {
-                      setSelectedTags([])
-                      setGuestFilter(null)
-                    }}
-                    className="mt-4 text-forest-600 hover:text-forest-700 font-medium"
-                  >
-                    Clear all filters
-                  </button>
-                </div>
-              ) : (
-                <div className={`${
-                  viewMode === 'grid' 
-                    ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' 
-                    : 'space-y-4'
-                }`}>
-                  {filteredProperties.map((property) => (
-                    <div
-                      key={property.id}
-                      className={`transition-all duration-200 ${
-                        hoveredProperty?.id === property.id 
-                          ? 'ring-2 ring-forest-500 ring-offset-2 rounded-lg' 
-                          : ''
-                      }`}
-                      onMouseEnter={() => setHoveredProperty(property)}
-                      onMouseLeave={() => setHoveredProperty(null)}
-                    >
-                      <PropertyCard property={property} viewMode={viewMode} />
-                    </div>
-                  ))}
-                </div>
-              )}
-              </div>
-            </div>
-
-            {/* Right Side - Fixed Map */}
-            <div className="fixed right-0 top-[120px] w-[35%] h-[calc(100vh-120px)] bg-gray-100 z-10 overflow-visible">
-              <MapView
-                properties={properties}
-                visibleProperties={filteredProperties}
-                selectedProperty={selectedProperty}
-                hoveredProperty={hoveredProperty}
-                onPropertySelect={setSelectedProperty}
-              />
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* List View */
-        <div className="p-4">
-          {/* Mobile: No grid toggle, always show list */}
-          <div className="lg:hidden">
-            {isLoading ? (
-              <div className="text-center py-12">
-                <div className="text-gray-500">Loading properties...</div>
-              </div>
-            ) : filteredProperties.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-500">No properties found matching your criteria.</div>
-                <button
-                  onClick={() => {
-                    setSelectedTags([])
-                    setGuestFilter(null)
-                  }}
-                  className="mt-4 text-forest-600 hover:text-forest-700 font-medium text-sm"
-                >
-                  Clear all filters
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredProperties.map((property) => (
-                  <PropertyCard key={property.id} property={property} viewMode="list" />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Desktop: Grid/List toggle */}
-          <div className="hidden lg:block">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {filteredProperties.length} treehouse{filteredProperties.length !== 1 ? 's' : ''} found
-              </h3>
-              <ToggleSwitch viewMode={viewMode} onViewModeChange={setViewMode} />
-            </div>
-            
-            {isLoading ? (
-              <div className="text-center py-12">
-                <div className="text-gray-500 text-lg">Loading properties...</div>
-              </div>
-            ) : filteredProperties.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-500 text-lg">No properties found matching your criteria.</div>
-                <button
-                  onClick={() => {
-                    setSelectedTags([])
-                    setGuestFilter(null)
-                  }}
-                  className="mt-4 text-forest-600 hover:text-forest-700 font-medium"
-                >
-                  Clear all filters
-                </button>
-              </div>
-            ) : (
-              <div className={`grid gap-6 ${
-                viewMode === 'grid' 
-                  ? 'grid-cols-1 md:grid-cols-2' 
-                  : 'grid-cols-1'
-              }`}>
-                {filteredProperties.map((property) => (
-                  <PropertyCard key={property.id} property={property} viewMode={viewMode} />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <MoreFiltersPanel
+        isOpen={moreFiltersOpen}
+        onClose={() => setMoreFiltersOpen(false)}
+        secondaryTags={allSecondaryTags}
+        allSecondaryTags={allSecondaryTags}
+        selectedSecondary={selectedSecondary}
+        onToggleSecondary={toggleSecondary}
+        onClearAll={clearAllFilters}
+      />
     </div>
   )
 }
