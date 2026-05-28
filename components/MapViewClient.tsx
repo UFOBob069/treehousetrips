@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
-import L from 'leaflet'
+import L, { type LatLngBoundsExpression, type LatLngTuple } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Image from 'next/image'
 import Link from 'next/link'
 import { TreePine, Star, Heart, Zap } from 'lucide-react'
 
 // Component to fit map bounds
-function FitBounds({ bounds }: { bounds: [[number, number], [number, number]] | null }) {
+function FitBounds({ bounds }: { bounds: LatLngBoundsExpression | null }) {
   const map = useMap()
   
   useEffect(() => {
@@ -123,42 +123,40 @@ export default function MapViewClient({ properties, visibleProperties, selectedP
   )
   
   // Calculate bounds to fit all properties
-  const calculateBounds = (properties: typeof validProperties) => {
+  const calculateBounds = (
+    properties: typeof validProperties
+  ): { center: LatLngTuple; bounds: LatLngBoundsExpression | null } => {
     if (properties.length === 0) {
       return {
-        center: [45.5152, -122.6784], // Default to Portland, Oregon
-        bounds: null
+        center: [45.5152, -122.6784],
+        bounds: null,
       }
     }
-    
+
     if (properties.length === 1) {
       return {
         center: [properties[0].lat, properties[0].lng],
-        bounds: null
+        bounds: null,
       }
     }
-    
-    const lats = properties.map(p => p.lat)
-    const lngs = properties.map(p => p.lng)
-    
+
+    const lats = properties.map((p) => p.lat)
+    const lngs = properties.map((p) => p.lng)
+
     const minLat = Math.min(...lats)
     const maxLat = Math.max(...lats)
     const minLng = Math.min(...lngs)
     const maxLng = Math.max(...lngs)
-    
-    // Add padding to bounds
+
     const latPadding = (maxLat - minLat) * 0.1
     const lngPadding = (maxLng - minLng) * 0.1
-    
+
     return {
-      center: [
-        (minLat + maxLat) / 2,
-        (minLng + maxLng) / 2
-      ],
+      center: [(minLat + maxLat) / 2, (minLng + maxLng) / 2],
       bounds: [
         [minLat - latPadding, minLng - lngPadding],
-        [maxLat + latPadding, maxLng + lngPadding]
-      ]
+        [maxLat + latPadding, maxLng + lngPadding],
+      ],
     }
   }
   

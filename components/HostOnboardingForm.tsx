@@ -30,6 +30,50 @@ interface HostOnboardingFormProps {
   onBack?: () => void
 }
 
+interface ListingFormData {
+  title: string
+  description: string
+  location: string
+  exactAddress: string
+  price: number
+  contactEmail: string
+  contactPhone: string
+  airbnbUrl: string
+  images: string[]
+  tags: string[]
+  guests: number
+  bedrooms: number
+  bathrooms: number
+  rating: number
+  reviewCount: number
+  lat?: number
+  lng?: number
+  isPublished: boolean
+  isPaid: boolean
+  subscriptionStatus: 'active' | 'expired' | 'pending'
+}
+
+const createEmptyFormData = (email = ''): ListingFormData => ({
+  title: '',
+  description: '',
+  location: '',
+  exactAddress: '',
+  price: 0,
+  contactEmail: email,
+  contactPhone: '',
+  airbnbUrl: '',
+  images: [],
+  tags: [],
+  guests: 0,
+  bedrooms: 0,
+  bathrooms: 0,
+  rating: 0,
+  reviewCount: 0,
+  isPublished: false,
+  isPaid: false,
+  subscriptionStatus: 'pending',
+})
+
 export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnboardingFormProps) {
   const { user } = useAuth()
   const [step, setStep] = useState<'url' | 'edit' | 'preview'>(mode === 'scratch' ? 'edit' : 'url')
@@ -40,27 +84,9 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  // Form fields for editing
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    location: '',
-    exactAddress: '',
-    price: 0,
-    contactEmail: user?.email || '',
-    contactPhone: '',
-    airbnbUrl: '',
-    images: [] as string[],
-    tags: [] as string[],
-    guests: 0,
-    bedrooms: 0,
-    bathrooms: 0,
-    rating: 0,
-    reviewCount: 0,
-    isPublished: false,
-    isPaid: false,
-    subscriptionStatus: 'pending' as 'active' | 'expired' | 'pending'
-  })
+  const [formData, setFormData] = useState<ListingFormData>(() =>
+    createEmptyFormData(user?.email || '')
+  )
 
   const handleScrape = async () => {
     if (!airbnbUrl) return
@@ -124,13 +150,12 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
       
       // Pre-populate form with scraped data
       setFormData({
+        ...createEmptyFormData(user?.email || ''),
         title: result.data.title,
         description: result.data.description,
         location: result.data.location,
-        exactAddress: result.data.location, // Use scraped location as initial exact address
+        exactAddress: result.data.location,
         price: result.data.price,
-        contactEmail: user?.email || '',
-        contactPhone: '',
         airbnbUrl: airbnbUrl,
         images: result.data.images,
         tags: result.data.amenities,
@@ -139,9 +164,6 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
         bathrooms: result.data.bathrooms,
         rating: result.data.rating,
         reviewCount: result.data.reviewCount,
-        isPublished: false,
-        isPaid: false,
-        subscriptionStatus: 'pending',
         ...(typeof result.data.lat === 'number' &&
         typeof result.data.lng === 'number' &&
         Number.isFinite(result.data.lat) &&

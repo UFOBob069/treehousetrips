@@ -134,7 +134,7 @@ export function sortBrowseProperties(
 }
 
 export function getAllTags(properties: BrowseProperty[]): string[] {
-  const primaryTags = new Set(BROWSE_CATEGORIES.flatMap((c) => c.tags))
+  const primaryTags = new Set<string>(BROWSE_CATEGORIES.flatMap((c) => [...c.tags]))
   return Array.from(
     new Set(properties.flatMap((p) => p.tags).filter((t) => !primaryTags.has(t)))
   ).sort()
