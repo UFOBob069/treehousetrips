@@ -1,42 +1,36 @@
+import Link from 'next/link'
+
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-2">
-            <h3 className="text-2xl font-bold text-forest-400 mb-4">🌲 Treehouse Trips</h3>
-            <p className="text-gray-300 mb-4">
-              Curated, invite-only access to the world's most exceptional treehouse vacation rentals.
+    <footer className="bg-forest-950 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-16">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-10">
+          <div className="max-w-sm">
+            <Link href="/" className="font-serif text-2xl text-white tracking-tight">
+              Treehouse Trips
+            </Link>
+            <p className="mt-4 text-sm text-white/60 leading-relaxed">
+              Curated canopy escapes for those who seek wonder above the forest floor.
             </p>
-            <p className="text-sm text-gray-400">
-              All bookings and payments are processed through Airbnb. We are not responsible for booking transactions.
-            </p>
           </div>
-          
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              <li><a href="/" className="text-gray-300 hover:text-white transition-colors">Home</a></li>
-              <li><a href="/create" className="text-gray-300 hover:text-white transition-colors">List Your Treehouse</a></li>
-              <li><a href="/about" className="text-gray-300 hover:text-white transition-colors">About</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Contact</h4>
-            <ul className="space-y-2">
-              <li className="text-gray-300">hello@treehousetrips.com</li>
-              <li className="text-gray-300">+1 (555) 123-4567</li>
-            </ul>
-          </div>
+
+          <nav className="flex flex-wrap gap-x-10 gap-y-4 text-sm">
+            <Link href="/properties" className="text-white/70 hover:text-white transition-colors">
+              Explore stays
+            </Link>
+            <Link href="/create" className="text-white/70 hover:text-white transition-colors">
+              List your treehouse
+            </Link>
+            <Link href="/about" className="text-white/70 hover:text-white transition-colors">
+              About
+            </Link>
+          </nav>
         </div>
-        
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p className="text-gray-400 text-sm">
-            © 2024 Treehouse Trips. All rights reserved. | 
-            <span className="ml-2 text-xs text-gray-500">
-              All bookings processed through Airbnb. We are not responsible for booking transactions.
-            </span>
+
+        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-xs text-white/40">
+          <p>© {new Date().getFullYear()} Treehouse Trips</p>
+          <p className="max-w-md">
+            Bookings are processed through Airbnb. We are not responsible for booking transactions.
           </p>
         </div>
       </div>

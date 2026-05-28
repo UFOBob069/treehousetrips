@@ -1,11 +1,5 @@
-import Hero from '@/components/Hero'
-import TravelerBenefits from '@/components/TravelerBenefits'
+import HomePage from '@/components/home/HomePage'
 
 export default function Home() {
-  return (
-    <>
-      <Hero />
-      <TravelerBenefits />
-    </>
-  )
+  return <HomePage />
 }

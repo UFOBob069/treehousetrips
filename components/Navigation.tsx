@@ -12,10 +12,21 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const { user, signOut } = useAuth()
   const pathname = usePathname()
   const userMenuRef = useRef<HTMLDivElement>(null)
   const isBrowsePage = pathname?.startsWith('/properties')
+  const isImmersiveLanding =
+    pathname === '/' || pathname === '/list-your-treehouse'
+  const transparentNav = isImmersiveLanding && !scrolled
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 48)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -31,42 +42,62 @@ export default function Navigation() {
     }
   }, [])
 
+  const navShell = transparentNav
+    ? 'fixed top-0 left-0 right-0 z-50 bg-transparent border-b border-transparent'
+    : isImmersiveLanding
+      ? 'fixed top-0 left-0 right-0 z-50 bg-cream/95 backdrop-blur-md border-b border-stone-200/40 shadow-sm'
+      : 'sticky top-0 z-50 bg-cream/95 backdrop-blur-md border-b border-stone-200/40 shadow-sm'
+
+  const linkClass = transparentNav
+    ? 'text-white/90 hover:text-white'
+    : 'text-stone-700 hover:text-forest-800'
+
+  const logoClass = transparentNav
+    ? 'font-serif text-xl text-white tracking-tight'
+    : 'font-serif text-xl text-forest-900 tracking-tight'
+
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav className={navShell}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0">
-              <span className="text-2xl font-bold text-forest-600">🌲 Treehouse Trips</span>
+              <span className={logoClass}>Treehouse Trips</span>
             </Link>
           </div>
 
           {/* Search lives on /properties browse bar */}
-          {!isBrowsePage && (
+          {!isBrowsePage && !isImmersiveLanding && (
             <div className="flex-1 max-w-lg mx-8 hidden md:block">
               <Link
                 href="/properties"
-                className="relative flex items-center w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full text-sm text-gray-500 hover:border-forest-400 hover:bg-forest-50/50 transition-colors"
+                className="relative flex items-center w-full pl-10 pr-4 py-2 border border-stone-200/80 rounded-full text-sm text-stone-500 hover:border-forest-500/40 hover:bg-stone-100/50 transition-colors bg-white/80"
               >
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
                 Search treehouses…
               </Link>
             </div>
           )}
-          {isBrowsePage && <div className="flex-1 hidden md:block" aria-hidden />}
-
+          {(isBrowsePage || isImmersiveLanding) && <div className="flex-1 hidden md:block" aria-hidden />}
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4">
-              <Link href="/" className="text-gray-700 hover:text-forest-600 px-3 py-2 text-sm font-medium transition-colors">
+              <Link href="/" className={`${linkClass} px-3 py-2 text-sm font-medium transition-colors`}>
                 Home
               </Link>
-              <Link href="/properties" className="text-gray-700 hover:text-forest-600 px-3 py-2 text-sm font-medium transition-colors">
+              <Link href="/properties" className={`${linkClass} px-3 py-2 text-sm font-medium transition-colors`}>
                 Browse
               </Link>
-              <Link href="/create" className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors">
+              <Link
+                href="/create"
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  transparentNav
+                    ? 'bg-white/15 text-white border border-white/25 hover:bg-white/25'
+                    : 'bg-forest-800 text-white hover:bg-forest-700'
+                }`}
+              >
                 List Your Treehouse
               </Link>
-              <Link href="/about" className="text-gray-700 hover:text-forest-600 px-3 py-2 text-sm font-medium transition-colors">
+              <Link href="/about" className={`${linkClass} px-3 py-2 text-sm font-medium transition-colors`}>
                 About
               </Link>
               
@@ -75,7 +106,7 @@ export default function Navigation() {
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-2 text-gray-700 hover:text-forest-600 px-3 py-2 text-sm font-medium transition-colors"
+                    className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors ${linkClass}`}
                   >
                     <User size={18} />
                     <span>{user.displayName || user.email}</span>
@@ -127,7 +158,7 @@ export default function Navigation() {
               ) : (
                 <button
                   onClick={() => setShowAuthModal(true)}
-                  className="text-gray-700 hover:text-forest-600 px-3 py-2 text-sm font-medium transition-colors"
+                  className={`px-3 py-2 text-sm font-medium transition-colors ${linkClass}`}
                 >
                   Sign In
                 </button>
@@ -138,7 +169,7 @@ export default function Navigation() {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-700 hover:text-forest-600 p-2"
+              className={`p-2 transition-colors ${transparentNav ? 'text-white' : 'text-stone-700 hover:text-forest-800'}`}
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -166,7 +197,7 @@ export default function Navigation() {
             </Link>
             <Link 
               href="/create" 
-              className="bg-primary-600 text-white block px-4 py-2 rounded-lg text-base font-medium hover:bg-primary-700 transition-colors mx-3 mb-3"
+              className="bg-forest-800 text-white block px-4 py-2 rounded-full text-base font-medium hover:bg-forest-700 transition-colors mx-3 mb-3"
               onClick={() => setIsOpen(false)}
             >
               List Your Treehouse

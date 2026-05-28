@@ -65,6 +65,14 @@ export default function PropertiesPage() {
   }, [isMobile, view])
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const collection = params.get('collection')
+    const search = params.get('search')
+    if (collection) setSelectedCategories([collection])
+    if (search) setSearchQuery(search)
+  }, [])
+
+  useEffect(() => {
     const load = async () => {
       try {
         const res = await fetch('/data/properties.json')

@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <AuthProvider>
           <Navigation />
-          <main className="min-h-screen">
+          <main className="min-h-screen bg-cream">
             {children}
           </main>
           <Footer />
