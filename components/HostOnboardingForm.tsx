@@ -130,6 +130,7 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
         exactAddress: result.data.location, // Use scraped location as initial exact address
         price: result.data.price,
         contactEmail: user?.email || '',
+        contactPhone: '',
         airbnbUrl: airbnbUrl,
         images: result.data.images,
         tags: result.data.amenities,
