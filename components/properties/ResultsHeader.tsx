@@ -16,20 +16,23 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 ]
 
 export default function ResultsHeader({ count, sort, onSortChange }: ResultsHeaderProps) {
+  const currentLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? 'Recommended'
+
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between py-4">
-      <h2 className="font-serif text-xl text-forest-950 tracking-tight">
+    <div className="flex items-center justify-between gap-3 py-3 md:py-4">
+      <h2 className="font-serif text-base text-forest-950 tracking-tight md:text-xl">
         {count} treehouse{count !== 1 ? 's' : ''} found
       </h2>
-      <div className="flex items-center gap-2">
-        <label htmlFor="sort-results" className="text-sm text-stone-500 whitespace-nowrap">
-          Sort by
+      <div className="relative shrink-0">
+        <label htmlFor="sort-results" className="sr-only">
+          Sort results
         </label>
         <select
           id="sort-results"
           value={sort}
           onChange={(e) => onSortChange(e.target.value as SortOption)}
-          className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-forest-600/30"
+          className="appearance-none rounded-xl bg-stone-100/90 py-2 pl-3 pr-8 text-sm font-medium text-stone-700 focus:outline-none focus:ring-2 focus:ring-forest-600/25 md:rounded-full md:border md:border-stone-200/80 md:bg-white md:px-4 md:font-normal"
+          aria-label={`Sort by ${currentLabel}`}
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -37,6 +40,12 @@ export default function ResultsHeader({ count, sort, onSortChange }: ResultsHead
             </option>
           ))}
         </select>
+        <span
+          className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 text-xs md:right-3"
+          aria-hidden
+        >
+          ▼
+        </span>
       </div>
     </div>
   )

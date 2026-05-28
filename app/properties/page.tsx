@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import MapView from '@/components/MapView'
 import SearchControlBar from '@/components/properties/SearchControlBar'
 import CategoryScroller from '@/components/properties/CategoryScroller'
@@ -15,11 +15,25 @@ import {
   sortBrowseProperties,
   getAllTags,
 } from '@/lib/property-browse'
-import { Map } from 'lucide-react'
+
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`)
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [breakpoint])
+
+  return isMobile
+}
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<BrowseProperty[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const isMobile = useIsMobile()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
@@ -27,11 +41,28 @@ export default function PropertiesPage() {
   const [guestMin, setGuestMin] = useState<number | null>(null)
   const [petsOnly, setPetsOnly] = useState(false)
   const [sort, setSort] = useState<SortOption>('recommended')
-  const [view, setView] = useState<BrowseView>('grid')
+  const [view, setView] = useState<BrowseView>('list')
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false)
 
   const [selectedProperty, setSelectedProperty] = useState<BrowseProperty | null>(null)
   const [hoveredProperty, setHoveredProperty] = useState<BrowseProperty | null>(null)
+
+  const handleViewChange = useCallback(
+    (next: BrowseView) => {
+      if (isMobile && next === 'grid') {
+        setView('list')
+        return
+      }
+      setView(next)
+    },
+    [isMobile]
+  )
+
+  useEffect(() => {
+    if (isMobile && view === 'grid') {
+      setView('list')
+    }
+  }, [isMobile, view])
 
   useEffect(() => {
     const load = async () => {
@@ -86,12 +117,15 @@ export default function PropertiesPage() {
     setPetsOnly(false)
   }
 
+  const effectiveView = isMobile ? (view === 'map' ? 'map' : 'list') : view
+
+  const cardViewMode = effectiveView === 'list' && !isMobile ? 'list' : 'grid'
+
   const emptyState = (
     <div className="text-center py-16 px-4">
       <p className="font-serif text-xl text-forest-900 mb-2">No treehouses match your search</p>
       <p className="text-stone-600 text-sm mb-6 max-w-md mx-auto">
-        Try clearing filters or searching a broader destination — Oregon, redwoods, romantic, or
-        family-friendly.
+        Try clearing filters or searching a broader destination.
       </p>
       <button
         type="button"
@@ -103,12 +137,12 @@ export default function PropertiesPage() {
     </div>
   )
 
-  const resultsGrid = (
+  const resultsList = (
     <div
       className={
-        view === 'grid'
+        effectiveView === 'grid' && !isMobile
           ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5'
-          : 'flex flex-col gap-5'
+          : 'flex flex-col gap-6 md:gap-5 max-md:px-1'
       }
     >
       {filtered.map((property) => (
@@ -119,7 +153,7 @@ export default function PropertiesPage() {
         >
           <PropertyBrowseCard
             property={property}
-            viewMode={view === 'list' ? 'list' : 'grid'}
+            viewMode={cardViewMode}
             isHighlighted={hoveredProperty?.id === property.id}
           />
         </div>
@@ -137,23 +171,34 @@ export default function PropertiesPage() {
         petsOnly={petsOnly}
         onPetsChange={setPetsOnly}
         view={view}
-        onViewChange={setView}
+        onViewChange={handleViewChange}
         onMoreFilters={() => setMoreFiltersOpen(true)}
         activeFilterCount={activeFilterCount}
       />
 
-      <CategoryScroller selected={selectedCategories} onToggle={toggleCategory} />
+      {/* Categories hidden in map mode on mobile to save space */}
+      {!(isMobile && effectiveView === 'map') && (
+        <CategoryScroller selected={selectedCategories} onToggle={toggleCategory} />
+      )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ResultsHeader count={filtered.length} sort={sort} onSortChange={setSort} />
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        {!(isMobile && effectiveView === 'map') && (
+          <ResultsHeader count={filtered.length} sort={sort} onSortChange={setSort} />
+        )}
 
         {isLoading ? (
           <div className="py-20 text-center text-stone-500">Discovering treehouses…</div>
         ) : filtered.length === 0 ? (
           emptyState
-        ) : view === 'map' ? (
-          <div className="pb-8">
-            <div className="relative h-[calc(100vh-260px)] min-h-[520px] rounded-2xl overflow-hidden border border-stone-200/80 shadow-lg">
+        ) : effectiveView === 'map' ? (
+          <div className={`pb-8 ${isMobile ? '-mx-3 px-0' : ''}`}>
+            <div
+              className={`relative overflow-hidden shadow-lg ${
+                isMobile
+                  ? 'h-[calc(100dvh-120px)] min-h-[480px] rounded-none border-0'
+                  : 'h-[calc(100vh-260px)] min-h-[520px] rounded-2xl border border-stone-200/80'
+              }`}
+            >
               <MapView
                 properties={properties}
                 visibleProperties={filtered}
@@ -162,11 +207,28 @@ export default function PropertiesPage() {
                 onPropertySelect={setSelectedProperty}
               />
 
-              {/* Bottom overlay cards */} 
               <div className="absolute inset-x-0 bottom-0 z-20">
-                <div className="pointer-events-none h-16 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-                <div className="pointer-events-auto bg-[#faf8f5]/90 backdrop-blur-md border-t border-stone-200/80">
-                  <div className="flex gap-3 overflow-x-auto px-4 py-3 scrollbar-hide">
+                <div className="pointer-events-none h-12 bg-gradient-to-t from-black/40 to-transparent" />
+                <div className="pointer-events-auto bg-[#faf8f5]/92 backdrop-blur-md border-t border-stone-200/50">
+                  {isMobile && (
+                    <div className="flex items-center justify-between px-4 pt-2.5 pb-1">
+                      <span className="text-sm font-medium text-stone-700">
+                        {filtered.length} stays
+                      </span>
+                      <select
+                        value={sort}
+                        onChange={(e) => setSort(e.target.value as SortOption)}
+                        className="text-sm font-medium text-stone-600 bg-transparent focus:outline-none"
+                        aria-label="Sort"
+                      >
+                        <option value="recommended">Recommended</option>
+                        <option value="price-asc">Best value</option>
+                        <option value="price-desc">Premium</option>
+                        <option value="guests-desc">Spacious</option>
+                      </select>
+                    </div>
+                  )}
+                  <div className="flex gap-2.5 overflow-x-auto px-4 py-3 scrollbar-hide">
                     {filtered.map((p) => (
                       <button
                         key={p.id}
@@ -174,22 +236,28 @@ export default function PropertiesPage() {
                         onMouseEnter={() => setHoveredProperty(p)}
                         onMouseLeave={() => setHoveredProperty(null)}
                         onClick={() => setSelectedProperty(p)}
-                        className={`shrink-0 w-[260px] rounded-xl border bg-white text-left shadow-sm hover:shadow-md transition-all overflow-hidden ${
+                        className={`shrink-0 w-[200px] rounded-2xl text-left overflow-hidden transition-all active:scale-[0.98] ${
                           selectedProperty?.id === p.id
-                            ? 'border-forest-600 ring-2 ring-forest-500/30'
-                            : 'border-stone-200'
+                            ? 'ring-2 ring-forest-600 shadow-md'
+                            : 'shadow-sm'
                         }`}
                       >
-                        <div className="flex">
-                          <div className="relative h-[86px] w-[110px] bg-stone-100">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={p.images?.[0]} alt="" className="h-full w-full object-cover" />
+                        <div className="relative h-24 w-full bg-stone-200">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={p.images?.[0]}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                          <span className="absolute bottom-2 left-2 rounded-full bg-black/45 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
+                            {p.price}
+                          </span>
+                        </div>
+                        <div className="p-2.5 bg-[#fffcf7]">
+                          <div className="font-serif text-sm text-forest-950 line-clamp-1">
+                            {p.name}
                           </div>
-                          <div className="p-3 flex-1">
-                            <div className="text-xs font-semibold text-forest-700">{p.price}</div>
-                            <div className="font-serif text-sm text-forest-950 line-clamp-1">{p.name}</div>
-                            <div className="text-xs text-stone-600 line-clamp-1">{p.location}</div>
-                          </div>
+                          <div className="text-xs text-stone-500 line-clamp-1">{p.location}</div>
                         </div>
                       </button>
                     ))}
@@ -199,19 +267,7 @@ export default function PropertiesPage() {
             </div>
           </div>
         ) : (
-          <div className="pb-12">
-            {resultsGrid}
-            <div className="lg:hidden fixed bottom-6 right-4 z-30">
-              <button
-                type="button"
-                onClick={() => setView('map')}
-                className="inline-flex items-center gap-2 rounded-full bg-forest-900 px-5 py-3 text-sm font-semibold text-white shadow-xl"
-              >
-                <Map className="h-4 w-4" />
-                Map
-              </button>
-            </div>
-          </div>
+          <div className="pb-16 md:pb-12">{resultsList}</div>
         )}
       </div>
 
@@ -222,6 +278,10 @@ export default function PropertiesPage() {
         allSecondaryTags={allSecondaryTags}
         selectedSecondary={selectedSecondary}
         onToggleSecondary={toggleSecondary}
+        selectedCategories={selectedCategories}
+        onToggleCategory={toggleCategory}
+        petsOnly={petsOnly}
+        onPetsChange={setPetsOnly}
         onClearAll={clearAllFilters}
       />
     </div>
