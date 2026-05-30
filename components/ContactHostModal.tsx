@@ -5,6 +5,7 @@ import { X, Send, MessageCircle, User, Mail, Phone } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { createConversation, createMessage } from '@/lib/firestore'
 import { Property } from '@/lib/firestore'
+import { canViewHostContactInfo } from '@/lib/host-contact-visibility'
 
 interface ContactHostModalProps {
   isOpen: boolean
@@ -30,9 +31,9 @@ export default function ContactHostModal({
 
   const email = property.contactEmail?.trim()
   const phone = property.contactPhone?.trim()
-  const showEmail = property.showContactEmail && email
-  const showPhone = property.showContactPhone && phone
-  const hasHostContact = showEmail || showPhone
+  const showEmail = Boolean(user && property.showContactEmail && email)
+  const showPhone = Boolean(user && property.showContactPhone && phone)
+  const hasHostContact = canViewHostContactInfo(property, Boolean(user))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

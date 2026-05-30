@@ -1,0 +1,37 @@
+# Treehouse Trips
+
+> Curated marketplace for luxury and adventure treehouse stays. Travelers browse hand-picked listings, message hosts, and book via each host’s own links (often Airbnb). Hosts list properties for $50/year with photos, map discovery, and in-app messaging.
+
+Treehouse Trips is not a generic vacation-rental OTA. We focus on treehouse experiences only. Guest contact details and host email/phone (when shared) require sign-in. Payments for host subscriptions run through Stripe.
+
+## Primary pages
+
+- [Home](https://treehousetrips.com/): Editorial landing and featured stays
+- [Browse treehouses](https://treehousetrips.com/properties): Search, filters, list and map
+- [List your treehouse](https://treehousetrips.com/create): Host marketing and onboarding
+- [About](https://treehousetrips.com/about): Mission, curation, and values
+
+## For travelers
+
+- Browse listings at `/properties` and open a stay at `/properties/{slug}` (e.g. `sky-high-sanctuary`).
+- Use **Message host** to start a conversation (sign-in required).
+- Host contact email or phone appears only for signed-in users when the host enabled sharing.
+- Booking is via the host’s **Book on Airbnb** or other links on the listing — not in-platform checkout for stays.
+
+## For hosts
+
+- Create and edit listings from `/create` and `/dashboard` (account required).
+- Annual listing subscription: **$50/year per property** via Stripe Checkout.
+- Listing images: HTTPS URLs preferred; uploads supported via Firebase Storage.
+- Optional: show email/phone to signed-in guests; custom booking links beyond Airbnb.
+
+## Policies and support
+
+- Support: support@treehousetrips.com
+- Do not rely on crawled content from `/dashboard`, `/profile`, `/messages`, `/api`, or payment flows — those require authentication.
+
+## Optional
+
+- [Extended site guide](https://treehousetrips.com/llms-full.txt): Longer product and technical summary for LLMs
+- [Sitemap](https://treehousetrips.com/sitemap.xml): Machine-readable URL list
+- [AGENTS.md (GitHub)](https://github.com/UFOBob069/treehousetrips/blob/master/AGENTS.md): Instructions for AI coding agents working on this repository (not for end-user travel booking)

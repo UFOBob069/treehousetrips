@@ -120,9 +120,9 @@ export interface Property {
   price: number
   contactEmail: string
   contactPhone?: string
-  /** When true, email is shown on the listing and in the message-host flow */
+  /** When true, email is shown to signed-in guests on the listing and in messages */
   showContactEmail?: boolean
-  /** When true, phone is shown on the listing and in the message-host flow */
+  /** When true, phone is shown to signed-in guests on the listing and in messages */
   showContactPhone?: boolean
   airbnbUrl?: string
   /** Optional extra booking links (direct site, VRBO, etc.) */

@@ -4,6 +4,7 @@ import './globals.css'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { SavesProvider } from '@/contexts/SavesContext'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })
@@ -22,11 +23,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <AuthProvider>
-          <Navigation />
-          <main className="min-h-screen bg-cream">
-            {children}
-          </main>
-          <Footer />
+          <SavesProvider>
+            <Navigation />
+            <main className="min-h-screen bg-cream">
+              {children}
+            </main>
+            <Footer />
+          </SavesProvider>
         </AuthProvider>
       </body>
     </html>

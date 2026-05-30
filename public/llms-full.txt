@@ -1,0 +1,64 @@
+# Treehouse Trips — extended guide for AI systems
+
+> Same product as /llms.txt with more operational detail. Prefer /llms.txt for short context.
+
+## Product summary
+
+Treehouse Trips connects travelers with curated treehouse vacation rentals. The public site emphasizes editorial photography, map/list browse, and property detail pages. Hosts pay an annual platform fee to publish a listing; travelers typically complete bookings on external platforms (Airbnb or host-provided URLs).
+
+## Technology (high level)
+
+- **Frontend:** Next.js 14 App Router, React, Tailwind CSS (cream/forest palette, Playfair Display + Inter)
+- **Auth:** Firebase Authentication (email/password and Google sign-in)
+- **Data:** Firestore for users, properties, conversations, messages; static `data/properties.json` for demo listings
+- **Storage:** Firebase Storage for host-uploaded listing images
+- **Payments:** Stripe Checkout for host annual subscriptions; webhooks update listing publish state
+
+## Public routes (indexable)
+
+| Path | Purpose |
+|------|---------|
+| `/` | Homepage |
+| `/properties` | Browse |
+| `/properties/{slug}` | Listing detail |
+| `/about` | About |
+| `/create` | Host landing / listing flow |
+| `/list-your-treehouse` | Redirects to `/create` |
+
+## Authenticated / private routes (do not summarize as public offers)
+
+- `/dashboard`, `/dashboard/properties/{id}`, `/dashboard/subscriptions`
+- `/profile`, `/messages`
+- `/pay/{propertyId}`, `/payment`, `/confirmation`, `/preview`
+- `/apply` (legacy host application flow)
+- `/api/*`
+
+## Guest messaging and contact
+
+- Messaging requires Firebase sign-in.
+- `showContactEmail` and `showContactPhone` on a property control whether email/phone render for **signed-in** guests on the listing and in the message-host modal.
+- Conversations and messages are stored in Firestore.
+
+## Host listing fields (Firestore)
+
+Notable fields: title, description, location, images, tags, price, guests, bedrooms, bathrooms, airbnbUrl, bookingLinks[], showContactEmail, showContactPhone, subscription status, isPublished.
+
+## Demo listings
+
+Static JSON demos use slugs derived from property names, e.g.:
+
+- https://treehousetrips.com/properties/sky-high-sanctuary
+- https://treehousetrips.com/properties/whispering-pines-retreat
+- https://treehousetrips.com/properties/eco-treehouse-haven
+
+Live host-created listings use the same URL pattern when published.
+
+## Contact
+
+- General: support@treehousetrips.com
+
+## Related files
+
+- https://treehousetrips.com/llms.txt — short spec-compliant summary
+- https://treehousetrips.com/robots.txt
+- https://treehousetrips.com/sitemap.xml

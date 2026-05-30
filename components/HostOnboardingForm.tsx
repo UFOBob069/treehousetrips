@@ -670,8 +670,8 @@ export default function HostOnboardingForm({
                 <div className="space-y-4 pt-2">
                   <h4 className="text-sm font-medium text-gray-900">Contact information</h4>
                   <p className="text-xs text-gray-500">
-                    Used for platform messaging. Choose what travelers can see on your listing and
-                    when they message you.
+                    Used for platform messaging. Email and phone are only shown to signed-in guests,
+                    and only if you enable the options below.
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -692,7 +692,7 @@ export default function HostOnboardingForm({
                           }
                           className="mt-0.5 h-4 w-4 rounded border-stone-300 text-forest-800 focus:ring-forest-600"
                         />
-                        <span>Show email on listing &amp; message host</span>
+                        <span>Show email to signed-in guests (listing &amp; messages)</span>
                       </label>
                     </div>
                     <div>
@@ -714,7 +714,7 @@ export default function HostOnboardingForm({
                           }
                           className="mt-0.5 h-4 w-4 rounded border-stone-300 text-forest-800 focus:ring-forest-600"
                         />
-                        <span>Show phone on listing &amp; message host</span>
+                        <span>Show phone to signed-in guests (listing &amp; messages)</span>
                       </label>
                     </div>
                   </div>
@@ -935,13 +935,13 @@ export default function HostOnboardingForm({
                     <p>
                       <span className="font-medium text-gray-700">Email:</span>{' '}
                       {formData.contactEmail || '—'}
-                      {formData.showContactEmail ? ' (visible to guests)' : ' (hidden)'}
+                      {formData.showContactEmail ? ' (visible when signed in)' : ' (hidden)'}
                     </p>
                     {formData.contactPhone.trim() && (
                       <p>
                         <span className="font-medium text-gray-700">Phone:</span>{' '}
                         {formData.contactPhone}
-                        {formData.showContactPhone ? ' (visible to guests)' : ' (hidden)'}
+                        {formData.showContactPhone ? ' (visible when signed in)' : ' (hidden)'}
                       </p>
                     )}
                     {(formData.airbnbUrl || formData.bookingLinks.length > 0) && (

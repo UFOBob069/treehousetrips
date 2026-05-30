@@ -35,11 +35,7 @@ function checkoutCustomText(propertyTitle: string): Stripe.Checkout.SessionCreat
     },
     after_submit: {
       message:
-        `Secure checkout by Stripe. Questions? support@treehousetrips.com · Manage your listing anytime from your host dashboard.`,
-    },
-    terms_of_service_acceptance: {
-      message:
-        'By subscribing you agree to our annual listing terms. You can cancel before your next renewal from your dashboard.',
+        'Secure checkout by Stripe. By subscribing you agree to annual listing terms; cancel before renewal from your dashboard. Questions: support@treehousetrips.com',
     },
   }
 }

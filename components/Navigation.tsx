@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Menu, X, Search, User, LogOut, Settings, Home, MessageCircle } from 'lucide-react'
+import { Menu, X, Search, User, LogOut, Settings, Home, MessageCircle, Heart } from 'lucide-react'
+import { useSaves } from '@/contexts/SavesContext'
 import { useAuth } from '../contexts/AuthContext'
 import AuthModal from './AuthModal'
 import LocationSearch from './LocationSearch'
@@ -14,6 +15,7 @@ export default function Navigation() {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { user, signOut } = useAuth()
+  const { savedProperties } = useSaves()
   const pathname = usePathname()
   const userMenuRef = useRef<HTMLDivElement>(null)
   const isBrowsePage = pathname?.startsWith('/properties')
@@ -57,6 +59,10 @@ export default function Navigation() {
   const logoClass = transparentNav
     ? 'font-serif text-xl text-white tracking-tight'
     : 'font-serif text-xl text-forest-900 tracking-tight'
+
+  const signInButtonClass = transparentNav
+    ? 'inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/20 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/30 transition-colors'
+    : 'inline-flex items-center gap-2 rounded-full border border-forest-700/25 bg-white px-4 py-2 text-sm font-semibold text-forest-900 shadow-[0_1px_3px_rgba(26,43,26,0.08)] hover:border-forest-700/40 hover:bg-forest-50 transition-colors'
 
   return (
     <nav className={navShell}>
@@ -129,6 +135,15 @@ export default function Navigation() {
                         Dashboard
                       </Link>
                       <Link
+                        href="/saved"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Heart size={16} className="mr-3" />
+                        Saved
+                        {savedProperties.length > 0 ? ` (${savedProperties.length})` : ''}
+                      </Link>
+                      <Link
                         href="/messages"
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setShowUserMenu(false)}
@@ -158,11 +173,9 @@ export default function Navigation() {
                   )}
                 </div>
               ) : (
-                <button
-                  onClick={() => setShowAuthModal(true)}
-                  className={`px-3 py-2 text-sm font-medium transition-colors ${linkClass}`}
-                >
-                  Sign In
+                <button type="button" onClick={() => setShowAuthModal(true)} className={signInButtonClass}>
+                  <User size={16} aria-hidden />
+                  Sign in
                 </button>
               )}
             </div>
@@ -211,7 +224,16 @@ export default function Navigation() {
             >
               About
             </Link>
-            
+            <Link
+              href="/saved"
+              className="flex items-center text-gray-700 hover:text-forest-600 px-3 py-2 text-base font-medium"
+              onClick={() => setIsOpen(false)}
+            >
+              <Heart size={18} className="mr-3" />
+              Saved
+              {user && savedProperties.length > 0 ? ` (${savedProperties.length})` : ''}
+            </Link>
+
             {/* Mobile Auth Section */}
             <div className="border-t pt-3 mt-3">
               {user ? (
@@ -257,14 +279,15 @@ export default function Navigation() {
                 </div>
               ) : (
                 <button
+                  type="button"
                   onClick={() => {
                     setShowAuthModal(true)
                     setIsOpen(false)
                   }}
-                  className="flex items-center text-gray-700 hover:text-forest-600 px-3 py-2 text-base font-medium"
+                  className="mx-3 mt-2 flex w-[calc(100%-1.5rem)] items-center justify-center gap-2 rounded-full border-2 border-forest-700 bg-forest-50 py-3 text-base font-semibold text-forest-900 hover:bg-forest-100 transition-colors"
                 >
-                  <User size={18} className="mr-3" />
-                  Sign In
+                  <User size={18} aria-hidden />
+                  Sign in
                 </button>
               )}
             </div>

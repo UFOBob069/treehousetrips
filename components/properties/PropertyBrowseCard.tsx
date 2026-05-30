@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { MapPin, Users, Bed, Bath, Heart } from 'lucide-react'
+import { MapPin, Users, Bed, Bath } from 'lucide-react'
+import SavePropertyButton from '@/components/SavePropertyButton'
 import type { BrowseProperty } from '@/lib/property-browse'
 import { getEmotionalDescriptor, slugify } from '@/lib/property-browse'
 import PropertyImageCarousel from './PropertyImageCarousel'
@@ -42,17 +43,11 @@ export default function PropertyBrowseCard({
         priority={imagePriority}
       />
 
-      <button
-        type="button"
-        aria-label="Save treehouse"
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
+      <SavePropertyButton
+        property={property}
         className="absolute top-3 left-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/25 text-white backdrop-blur-sm active:scale-95 transition-transform md:bg-white/90 md:text-forest-800 md:shadow-md"
-      >
-        <Heart className="h-4 w-4" />
-      </button>
+        iconClassName="h-4 w-4 md:text-forest-800"
+      />
       <span className="absolute top-3 right-3 z-10 rounded-full bg-black/40 px-3 py-1 text-sm font-semibold text-white backdrop-blur-md md:bg-forest-900/85">
         {property.price}
       </span>

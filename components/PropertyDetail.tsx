@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Users, Bed, Bath, ExternalLink, MessageCircle, ArrowLeft, Heart, Share, Star, Shield, Wifi, Car, Coffee, Mountain, Waves, Phone, Mail } from 'lucide-react'
+import { MapPin, Users, Bed, Bath, ExternalLink, MessageCircle, ArrowLeft, Share, Star, Shield, Wifi, Car, Coffee, Mountain, Waves, Phone, Mail } from 'lucide-react'
 import type { BookingLink } from '@/lib/firestore'
 import TreehouseFeatures from './TreehouseFeatures'
 import TreehouseStats from './TreehouseStats'
@@ -12,6 +12,11 @@ import TreehouseExperience from './TreehouseExperience'
 import TreehouseHero from './TreehouseHero'
 import ContactHostModal from './ContactHostModal'
 import AuthModal from './AuthModal'
+import { canViewHostContactInfo, hostSharesContactInfo } from '@/lib/host-contact-visibility'
+import SavePropertyButton from '@/components/SavePropertyButton'
+import { slugify } from '@/lib/property-browse'
+import type { BrowseProperty } from '@/lib/property-browse'
+import { useSaves } from '@/contexts/SavesContext'
 
 interface Property {
   id: string
@@ -45,28 +50,75 @@ interface PropertyDetailProps {
 
 export default function PropertyDetail({ property }: PropertyDetailProps) {
   const { user } = useAuth()
+  const { toggleSave } = useSaves()
   const [selectedImage, setSelectedImage] = useState(0)
-  const [isFavorite, setIsFavorite] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const [pendingContactAfterAuth, setPendingContactAfterAuth] = useState(false)
+  const [authIntent, setAuthIntent] = useState<'message' | 'contact' | 'save' | null>(null)
+  const [authContextMessage, setAuthContextMessage] = useState<string | undefined>()
+  const [pendingSaveProperty, setPendingSaveProperty] = useState<BrowseProperty | null>(null)
+
+  const browseProperty = useMemo<BrowseProperty>(
+    () => ({
+      id: property.id,
+      slug: slugify(property.title || property.name),
+      name: property.title || property.name,
+      description: property.description,
+      location: property.location,
+      lat: property.lat,
+      lng: property.lng,
+      airbnbUrl: property.airbnbUrl || '',
+      hostEmail: property.contactEmail || property.hostEmail,
+      images: property.images,
+      tags: property.tags,
+      price: property.price,
+      guests: property.guests,
+      bedrooms: property.bedrooms,
+      bathrooms: property.bathrooms,
+    }),
+    [property]
+  )
+
+  const hostSharesContact = hostSharesContactInfo(property)
+  const canViewHostContact = canViewHostContactInfo(property, Boolean(user))
+
+  function openSignIn(intent: 'message' | 'contact' | 'save') {
+    setAuthIntent(intent)
+    if (intent === 'save') {
+      setPendingSaveProperty(browseProperty)
+      setAuthContextMessage(
+        `Sign in to save “${property.title || property.name}” to your list. View all saves on Saved treehouses.`
+      )
+    } else {
+      setAuthContextMessage(
+        intent === 'message'
+          ? `Sign in to message the host of “${property.title || property.name}”. Your contact details stay private until you send a message.`
+          : 'Sign in to view the host’s contact information (email or phone, if they chose to share it).'
+      )
+    }
+    setShowAuthModal(true)
+  }
 
   function handleMessageHost() {
     if (!user) {
-      setPendingContactAfterAuth(true)
-      setShowAuthModal(true)
+      openSignIn('message')
       return
     }
     setShowContactModal(true)
   }
 
   useEffect(() => {
-    if (user && pendingContactAfterAuth) {
-      setShowAuthModal(false)
-      setPendingContactAfterAuth(false)
+    if (!user || !authIntent) return
+    setShowAuthModal(false)
+    setAuthContextMessage(undefined)
+    if (authIntent === 'message') {
       setShowContactModal(true)
+    } else if (authIntent === 'save' && pendingSaveProperty) {
+      void toggleSave(pendingSaveProperty)
+      setPendingSaveProperty(null)
     }
-  }, [user, pendingContactAfterAuth])
+    setAuthIntent(null)
+  }, [user, authIntent, pendingSaveProperty, toggleSave])
 
   // Ensure selectedImage is always within bounds
   const safeSelectedImage = Math.min(selectedImage, property.images.length - 1)
@@ -97,15 +149,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
               <Share size={20} className="text-gray-600" />
             </button>
-            <button 
-              onClick={() => setIsFavorite(!isFavorite)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <Heart 
-                size={20} 
-                className={`${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} 
-              />
-            </button>
+            <SavePropertyButton
+              property={browseProperty}
+              onRequireSignIn={() => openSignIn('save')}
+              className="rounded-full p-2 transition-colors hover:bg-gray-100"
+              iconClassName="h-5 w-5 text-gray-600"
+            />
           </div>
         </div>
 
@@ -267,30 +316,46 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     </div>
                   </div>
 
-                  {((property.showContactEmail && property.contactEmail) ||
-                    (property.showContactPhone && property.contactPhone)) && (
-                    <div className="mt-4 pt-4 border-t border-gray-200 space-y-2 text-sm">
-                      {property.showContactEmail && property.contactEmail && (
-                        <p className="text-gray-600 flex items-center gap-1.5">
-                          <Mail size={14} className="text-gray-400 shrink-0" />
-                          <a
-                            href={`mailto:${property.contactEmail}`}
-                            className="text-forest-600 hover:underline"
+                  {hostSharesContact && (
+                    <div className="mt-4 space-y-2 border-t border-gray-200 pt-4 text-sm">
+                      {canViewHostContact ? (
+                        <>
+                          {property.showContactEmail && property.contactEmail && (
+                            <p className="flex items-center gap-1.5 text-gray-600">
+                              <Mail size={14} className="shrink-0 text-gray-400" />
+                              <a
+                                href={`mailto:${property.contactEmail}`}
+                                className="text-forest-600 hover:underline"
+                              >
+                                {property.contactEmail}
+                              </a>
+                            </p>
+                          )}
+                          {property.showContactPhone && property.contactPhone && (
+                            <p className="flex items-center gap-1.5 text-gray-600">
+                              <Phone size={14} className="shrink-0 text-gray-400" />
+                              <a
+                                href={`tel:${property.contactPhone.replace(/\s/g, '')}`}
+                                className="text-forest-600 hover:underline"
+                              >
+                                {property.contactPhone}
+                              </a>
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <div className="rounded-lg bg-stone-50 px-3 py-2.5">
+                          <p className="text-stone-600">
+                            The host shares contact info with signed-in guests.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => openSignIn('contact')}
+                            className="mt-2 text-sm font-medium text-forest-700 hover:text-forest-800 hover:underline"
                           >
-                            {property.contactEmail}
-                          </a>
-                        </p>
-                      )}
-                      {property.showContactPhone && property.contactPhone && (
-                        <p className="text-gray-600 flex items-center gap-1.5">
-                          <Phone size={14} className="text-gray-400 shrink-0" />
-                          <a
-                            href={`tel:${property.contactPhone.replace(/\s/g, '')}`}
-                            className="text-forest-600 hover:underline"
-                          >
-                            {property.contactPhone}
-                          </a>
-                        </p>
+                            Sign in to view
+                          </button>
+                        </div>
                       )}
                     </div>
                   )}
@@ -342,19 +407,18 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
         isOpen={showAuthModal}
         onClose={() => {
           setShowAuthModal(false)
-          setPendingContactAfterAuth(false)
+          setAuthIntent(null)
+          setAuthContextMessage(undefined)
+          setPendingSaveProperty(null)
         }}
-        contextMessage={`Sign in to message the host of “${property.title || property.name}”. Your contact details stay private until you send a message.`}
+        contextMessage={authContextMessage}
       />
 
       {/* Contact Host Modal */}
       <ContactHostModal
         isOpen={showContactModal}
         onClose={() => setShowContactModal(false)}
-        onRequestSignIn={() => {
-          setPendingContactAfterAuth(true)
-          setShowAuthModal(true)
-        }}
+        onRequestSignIn={() => openSignIn('message')}
         property={{
           id: property.id,
           title: property.title || property.name,

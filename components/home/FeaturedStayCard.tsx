@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, MapPin } from 'lucide-react'
+import { MapPin } from 'lucide-react'
+import SavePropertyButton from '@/components/SavePropertyButton'
 import type { BrowseProperty } from '@/lib/property-browse'
 import { getEmotionalDescriptor, slugify } from '@/lib/property-browse'
 
@@ -31,17 +32,11 @@ export default function FeaturedStayCard({ property, priority }: FeaturedStayCar
           sizes="(max-width: 768px) 100vw, 33vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/20" />
-        <button
-          type="button"
-          aria-label="Save"
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-          }}
+        <SavePropertyButton
+          property={property}
           className="absolute top-4 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/25 text-white backdrop-blur-sm hover:bg-black/40 transition-colors"
-        >
-          <Heart className="h-4 w-4" />
-        </button>
+          iconClassName="h-4 w-4 text-white"
+        />
         <span className="absolute top-4 right-4 z-10 rounded-full bg-black/40 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-md">
           {property.price}
         </span>
