@@ -1,7 +1,6 @@
 'use client'
 
-import { X, PawPrint } from 'lucide-react'
-import { SECONDARY_BROWSE_CATEGORIES } from '@/lib/property-browse'
+import { X } from 'lucide-react'
 
 interface MoreFiltersPanelProps {
   isOpen: boolean
@@ -10,10 +9,6 @@ interface MoreFiltersPanelProps {
   allSecondaryTags: string[]
   selectedSecondary: string[]
   onToggleSecondary: (tag: string) => void
-  selectedCategories: string[]
-  onToggleCategory: (id: string) => void
-  petsOnly: boolean
-  onPetsChange: (v: boolean) => void
   onClearAll: () => void
 }
 
@@ -24,10 +19,6 @@ export default function MoreFiltersPanel({
   allSecondaryTags,
   selectedSecondary,
   onToggleSecondary,
-  selectedCategories,
-  onToggleCategory,
-  petsOnly,
-  onPetsChange,
   onClearAll,
 }: MoreFiltersPanelProps) {
   if (!isOpen) return null
@@ -57,49 +48,7 @@ export default function MoreFiltersPanel({
 
         <div className="p-5 space-y-6">
           <div>
-            <p className="text-sm font-medium text-stone-800 mb-3">Stay preferences</p>
-            <button
-              type="button"
-              onClick={() => onPetsChange(!petsOnly)}
-              className={`w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium transition-colors ${
-                petsOnly
-                  ? 'bg-forest-800 text-white'
-                  : 'bg-stone-200/70 text-stone-700'
-              }`}
-            >
-              <PawPrint className="h-5 w-5 shrink-0" />
-              Pet-friendly stays only
-            </button>
-          </div>
-
-          {SECONDARY_BROWSE_CATEGORIES.length > 0 && (
-            <div>
-              <p className="text-sm font-medium text-stone-800 mb-3">Vibes</p>
-              <div className="flex flex-wrap gap-2">
-                {SECONDARY_BROWSE_CATEGORIES.map((cat) => {
-                  const active = selectedCategories.includes(cat.id)
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => onToggleCategory(cat.id)}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors ${
-                        active
-                          ? 'bg-forest-800 text-white'
-                          : 'bg-stone-200/70 text-stone-700'
-                      }`}
-                    >
-                      <span aria-hidden>{cat.icon}</span>
-                      {cat.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          <div>
-            <p className="text-sm font-medium text-stone-800 mb-3">More amenities & vibes</p>
+            <p className="text-sm font-medium text-stone-800 mb-3">Amenities & tags</p>
             {tags.length === 0 ? (
               <p className="text-sm text-stone-500">No extra filters for current listings.</p>
             ) : (

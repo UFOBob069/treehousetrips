@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { createProperty, Property } from '@/lib/firestore'
+import { createProperty, getProperty, Property, updateProperty } from '@/lib/firestore'
 import { MapPin, Link, Edit3, Save, Eye, Loader2, CheckCircle, AlertCircle, ArrowRight, ChevronLeft } from 'lucide-react'
 import AddressAutocomplete from './AddressAutocomplete'
 import { BROWSE_CATEGORIES, slugify } from '@/lib/property-browse'
@@ -27,6 +27,7 @@ interface ScrapedData {
 
 interface HostOnboardingFormProps {
   mode: 'import' | 'scratch'
+  editPropertyId?: string
   onSuccess: (propertyTitle: string, propertyId: string) => void
   onBack?: () => void
 }
@@ -52,7 +53,7 @@ interface ListingFormData {
   lng?: number
   isPublished: boolean
   isPaid: boolean
-  subscriptionStatus: 'active' | 'expired' | 'pending'
+  subscriptionStatus: 'active' | 'expired' | 'pending' | 'canceled'
 }
 
 const createEmptyFormData = (email = ''): ListingFormData => ({
@@ -77,9 +78,44 @@ const createEmptyFormData = (email = ''): ListingFormData => ({
   subscriptionStatus: 'pending',
 })
 
-export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnboardingFormProps) {
+function propertyToFormData(property: Property, fallbackEmail = ''): ListingFormData {
+  return {
+    title: property.title || '',
+    slug: property.slug || '',
+    description: property.description || '',
+    location: property.location || '',
+    exactAddress: property.exactAddress || '',
+    price: property.price ?? 0,
+    contactEmail: property.contactEmail || fallbackEmail,
+    contactPhone: property.contactPhone || '',
+    airbnbUrl: property.airbnbUrl || '',
+    images: property.images || [],
+    tags: property.tags || [],
+    guests: property.guests ?? 0,
+    bedrooms: property.bedrooms ?? 0,
+    bathrooms: property.bathrooms ?? 0,
+    rating: 0,
+    reviewCount: 0,
+    lat: property.lat,
+    lng: property.lng,
+    isPublished: property.isPublished ?? false,
+    isPaid: property.isPaid ?? false,
+    subscriptionStatus: property.subscriptionStatus || 'pending',
+  }
+}
+
+export default function HostOnboardingForm({
+  mode,
+  editPropertyId,
+  onSuccess,
+  onBack,
+}: HostOnboardingFormProps) {
   const { user } = useAuth()
-  const [step, setStep] = useState<'url' | 'edit' | 'preview'>(mode === 'scratch' ? 'edit' : 'url')
+  const isEditing = Boolean(editPropertyId)
+  const [step, setStep] = useState<'url' | 'edit' | 'preview'>(
+    isEditing || mode === 'scratch' ? 'edit' : 'url'
+  )
+  const [loadingExisting, setLoadingExisting] = useState(isEditing)
   const [airbnbUrl, setAirbnbUrl] = useState('')
   const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null)
   const [editedData, setEditedData] = useState<Partial<Property>>({})
@@ -90,6 +126,39 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
   const [formData, setFormData] = useState<ListingFormData>(() =>
     createEmptyFormData(user?.email || '')
   )
+
+  useEffect(() => {
+    if (!editPropertyId || !user) return
+
+    let cancelled = false
+    async function loadExisting() {
+      if (!editPropertyId) return
+      setLoadingExisting(true)
+      setError('')
+      try {
+        const { data, error: loadError } = await getProperty(editPropertyId)
+        if (cancelled) return
+        if (loadError || !data) {
+          setError(loadError || 'Listing not found')
+          return
+        }
+        if (!user || data.ownerId !== user.uid) {
+          setError('You do not have permission to edit this listing.')
+          return
+        }
+        setFormData(propertyToFormData(data, user.email || ''))
+        setStep('edit')
+      } catch {
+        if (!cancelled) setError('Failed to load listing')
+      } finally {
+        if (!cancelled) setLoadingExisting(false)
+      }
+    }
+    loadExisting()
+    return () => {
+      cancelled = true
+    }
+  }, [editPropertyId, user])
 
   const toggleTag = (tag: string) => {
     setFormData((prev) => {
@@ -234,17 +303,27 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
 
       console.log('Property data to submit:', propertyData)
 
+      if (isEditing && editPropertyId) {
+        const { error: updateError } = await updateProperty(editPropertyId, propertyData)
+        if (updateError) {
+          setError(`Failed to update property: ${updateError}`)
+          return
+        }
+        setSuccess(true)
+        setTimeout(() => {
+          onSuccess(formData.title, editPropertyId)
+        }, 1200)
+        return
+      }
+
       const { id, error } = await createProperty(propertyData)
-      
-      console.log('Create property result:', { id, error })
-      
+
       if (error) {
         console.error('Error creating property:', error)
         setError(`Failed to create property: ${error}`)
         return
       }
-      
-      console.log('Property created successfully with ID:', id)
+
       setSuccess(true)
       setTimeout(() => {
         onSuccess(formData.title, id || '')
@@ -289,13 +368,27 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
     }))
   }
 
+  if (loadingExisting) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+      </div>
+    )
+  }
+
   if (success) {
     return (
       <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
         <div className="text-center">
           <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Listing Created Successfully!</h2>
-          <p className="text-gray-600">Your treehouse listing has been submitted for review.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {isEditing ? 'Listing updated' : 'Listing created successfully!'}
+          </h2>
+          <p className="text-gray-600">
+            {isEditing
+              ? 'Your changes have been saved.'
+              : 'Your treehouse listing has been submitted for review.'}
+          </p>
         </div>
       </div>
     )
@@ -308,11 +401,15 @@ export default function HostOnboardingForm({ mode, onSuccess, onBack }: HostOnbo
         <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-white">Create Your Listing</h1>
+              <h1 className="text-2xl font-bold text-white">
+                {isEditing ? 'Edit your listing' : 'Create your listing'}
+              </h1>
               <p className="text-primary-100">
-                {mode === 'import'
-                  ? 'Import your Airbnb listing and customize it for Treehouse Trips'
-                  : 'Fill in your treehouse details step by step'}
+                {isEditing
+                  ? 'Update photos, description, and details for your treehouse'
+                  : mode === 'import'
+                    ? 'Import your Airbnb listing and customize it for Treehouse Trips'
+                    : 'Fill in your treehouse details step by step'}
               </p>
             </div>
             {onBack && (

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { X, CreditCard, CheckCircle, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { startHostListingCheckout } from '@/lib/stripe-host-checkout'
 
 interface PaymentModalProps {
   isOpen: boolean
@@ -23,51 +24,24 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, propertyTitle
       setError('You must be logged in to make a payment')
       return
     }
+    if (!propertyId?.trim()) {
+      setError('Listing was not saved correctly. Open your dashboard and try again.')
+      return
+    }
 
     setLoading(true)
     setError('')
-    
+
     try {
-      // Create Stripe checkout session
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.uid,
-          propertyTitle: propertyTitle,
-          propertyId: propertyId,
-        }),
+      await startHostListingCheckout({
+        userId: user.uid,
+        propertyId,
+        propertyTitle,
+        customerEmail: user.email,
       })
-
-      const { sessionId, error: sessionError } = await response.json()
-
-      if (sessionError) {
-        throw new Error(sessionError)
-      }
-
-      // Redirect to Stripe Checkout
-      const { loadStripe } = await import('@stripe/stripe-js')
-      const stripe = await loadStripe(
-        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-      )
-
-      if (!stripe) {
-        throw new Error('Failed to load Stripe')
-      }
-
-      const { error: stripeError } = await stripe.redirectToCheckout({
-        sessionId,
-      })
-
-      if (stripeError) {
-        throw new Error(stripeError.message)
-      }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Payment error:', err)
-      setError(err.message || 'Payment failed. Please try again.')
-    } finally {
+      setError(err instanceof Error ? err.message : 'Payment failed. Please try again.')
       setLoading(false)
     }
   }

@@ -10,6 +10,7 @@ interface PropertyBrowseCardProps {
   property: BrowseProperty
   viewMode: 'grid' | 'list'
   isHighlighted?: boolean
+  imagePriority?: boolean
   onHover?: () => void
   onLeave?: () => void
 }
@@ -18,6 +19,7 @@ export default function PropertyBrowseCard({
   property,
   viewMode,
   isHighlighted,
+  imagePriority = false,
   onHover,
   onLeave,
 }: PropertyBrowseCardProps) {
@@ -33,12 +35,12 @@ export default function PropertyBrowseCard({
         isGrid ? '' : 'sm:w-[42%] shrink-0'
       }`}
     >
-      <div className="max-md:hidden">
-        <PropertyImageCarousel images={property.images} alt={property.name} variant={carouselVariant} />
-      </div>
-      <div className="md:hidden">
-        <PropertyImageCarousel images={property.images} alt={property.name} variant="mobile" />
-      </div>
+      <PropertyImageCarousel
+        images={property.images}
+        alt={property.name}
+        variant={carouselVariant}
+        priority={imagePriority}
+      />
 
       <button
         type="button"

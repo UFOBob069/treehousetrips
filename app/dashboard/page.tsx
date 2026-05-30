@@ -1,36 +1,40 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { getPropertiesByOwner, getUser } from '@/lib/firestore'
-import { Property, User } from '@/lib/firestore'
+import { getPropertiesByOwner } from '@/lib/firestore'
+import { Property } from '@/lib/firestore'
 import { 
   Home, 
   Plus, 
   Edit, 
   Eye, 
-  Star, 
   MapPin,
   Users,
+  Bed,
+  Bath,
   Settings,
   AlertCircle,
-  MessageCircle
+  MessageCircle,
+  CreditCard,
+  ArrowRight,
+  Sparkles,
 } from 'lucide-react'
+import {
+  getPropertySubscriptionState,
+  SubscribePropertyButton,
+} from '@/components/host/SubscribePropertyButton'
 import Link from 'next/link'
 
 export default function DashboardPage() {
   const { user } = useAuth()
-  const router = useRouter()
   const [properties, setProperties] = useState<Property[]>([])
-  const [userData, setUserData] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     if (user) {
       loadProperties()
-      loadUserData()
     }
   }, [user])
 
@@ -51,18 +55,13 @@ export default function DashboardPage() {
     }
   }
 
-  const loadUserData = async () => {
-    if (!user) return
-    
-    try {
-      const { data } = await getUser(user.uid)
-      if (data) {
-        setUserData(data)
-      }
-    } catch (err) {
-      console.error('Error loading user data:', err)
-    }
-  }
+  const activeSubscriptionCount = properties.filter(
+    (p) => getPropertySubscriptionState(p) === 'active'
+  ).length
+  const needsSubscriptionCount = properties.filter(
+    (p) => getPropertySubscriptionState(p) !== 'active'
+  ).length
+  const showSubscriptionCta = properties.length > 0 && needsSubscriptionCount > 0
 
   if (!user) {
     return (
@@ -87,10 +86,50 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Host Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back, {user.displayName || user.email}</p>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Host Dashboard</h1>
+            <p className="text-gray-600 mt-2">Welcome back, {user.displayName || user.email}</p>
+          </div>
+          <Link
+            href="/dashboard/subscriptions"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-forest-800 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-forest-900 transition-colors"
+          >
+            <CreditCard className="h-4 w-4" />
+            Listing subscriptions
+          </Link>
         </div>
+
+        {showSubscriptionCta ? (
+          <div className="mb-8 rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-forest-50 p-5 md:p-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-amber-900">
+                    Your next step
+                  </p>
+                  <h2 className="text-lg font-bold text-gray-900">
+                    Activate {needsSubscriptionCount === 1 ? 'your listing' : `${needsSubscriptionCount} listings`} — $50/year each
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-600 max-w-xl">
+                    Subscriptions put your treehouse on the map for travelers searching Treehouse Trips.
+                    No commission on Airbnb bookings — one flat annual fee per property.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/dashboard/subscriptions"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-forest-800 px-5 py-3 text-sm font-semibold text-white hover:bg-forest-900 whitespace-nowrap"
+              >
+                View plans &amp; activate
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        ) : null}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -134,19 +173,45 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <Link
+            href="/dashboard/subscriptions"
+            className="bg-white rounded-lg shadow p-6 hover:ring-2 hover:ring-forest-200 transition-shadow block"
+          >
             <div className="flex items-center">
-              <div className={`p-2 rounded-lg ${userData?.hasActiveSubscription ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                <Settings className={`h-6 w-6 ${userData?.hasActiveSubscription ? 'text-blue-600' : 'text-gray-400'}`} />
+              <div
+                className={`p-2 rounded-lg ${
+                  properties.length > 0 && activeSubscriptionCount === properties.length
+                    ? 'bg-green-100'
+                    : needsSubscriptionCount > 0
+                      ? 'bg-amber-100'
+                      : 'bg-gray-100'
+                }`}
+              >
+                <CreditCard
+                  className={`h-6 w-6 ${
+                    properties.length > 0 && activeSubscriptionCount === properties.length
+                      ? 'text-green-600'
+                      : needsSubscriptionCount > 0
+                        ? 'text-amber-700'
+                        : 'text-gray-400'
+                  }`}
+                />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Subscription</p>
-                <p className={`text-sm font-bold ${userData?.hasActiveSubscription ? 'text-blue-600' : 'text-gray-400'}`}>
-                  {userData?.hasActiveSubscription ? 'Active' : 'Inactive'}
+                <p className="text-sm font-medium text-gray-600">Listing subscriptions</p>
+                <p className="text-sm font-bold text-gray-900">
+                  {properties.length === 0
+                    ? 'None yet'
+                    : `${activeSubscriptionCount} of ${properties.length} active`}
                 </p>
+                {needsSubscriptionCount > 0 ? (
+                  <p className="text-xs text-amber-700 mt-0.5">Tap to activate →</p>
+                ) : properties.length > 0 ? (
+                  <p className="text-xs text-green-700 mt-0.5">Manage renewals →</p>
+                ) : null}
               </div>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Quick Actions */}
@@ -155,7 +220,24 @@ export default function DashboardPage() {
             <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link
+                href="/dashboard/subscriptions"
+                className={`flex items-center p-4 border rounded-lg transition-colors ${
+                  showSubscriptionCta
+                    ? 'border-forest-300 bg-forest-50 hover:bg-forest-100'
+                    : 'border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                <CreditCard className="h-6 w-6 text-forest-700 mr-3" />
+                <div>
+                  <h3 className="font-medium text-gray-900">Subscriptions</h3>
+                  <p className="text-sm text-gray-600">
+                    {showSubscriptionCta ? 'Activate listings — $50/yr' : 'Plans & billing per property'}
+                  </p>
+                </div>
+              </Link>
+
               <Link
                 href="/create"
                 className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
@@ -244,34 +326,40 @@ export default function DashboardPage() {
             <div className="divide-y divide-gray-200">
               {properties.map((property) => (
                 <div key={property.id} className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-4">
-                        {property.images && property.images.length > 0 && (
+                  <div className="flex items-stretch justify-between gap-4">
+                    <div className="flex min-w-0 flex-1 gap-4">
+                        {property.images && property.images.length > 0 ? (
                           <img
                             src={property.images[0]}
                             alt={property.title}
-                            className="h-16 w-16 object-cover rounded-lg"
+                            className="h-20 w-28 shrink-0 rounded-lg object-cover"
                           />
-                        )}
-                        <div className="flex-1">
-                          <h3 className="text-lg font-medium text-gray-900">{property.title}</h3>
-                          <div className="flex items-center text-gray-600 mt-1">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            <span className="text-sm">{property.location}</span>
+                        ) : (
+                          <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-lg bg-stone-100">
+                            <Home className="h-8 w-8 text-stone-400" />
                           </div>
-                          <div className="flex items-center mt-2 space-x-4">
-                            <div className="flex items-center text-sm text-gray-600">
-                              <Users className="h-4 w-4 mr-1" />
+                        )}
+                        <div className="min-w-0 flex-1 py-0.5">
+                          <h3 className="text-lg font-medium text-gray-900">{property.title}</h3>
+                          <div className="mt-1 flex items-center text-gray-600">
+                            <MapPin className="mr-1 h-4 w-4 shrink-0" />
+                            <span className="truncate text-sm">{property.location}</span>
+                          </div>
+                          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
+                            <span className="inline-flex items-center gap-1">
+                              <Users className="h-4 w-4 shrink-0" />
                               {property.guests} guests
-                            </div>
-                            <div className="flex items-center text-sm text-gray-600">
-                              <Star className="h-4 w-4 mr-1" />
-                              {property.bedrooms} bed • {property.bathrooms} bath
-                            </div>
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <Bed className="h-4 w-4 shrink-0" />
+                              {property.bedrooms} {property.bedrooms === 1 ? 'bed' : 'beds'}
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <Bath className="h-4 w-4 shrink-0" />
+                              {property.bathrooms} {property.bathrooms === 1 ? 'bath' : 'baths'}
+                            </span>
                           </div>
                         </div>
-                      </div>
                     </div>
                     
                     <div className="flex items-center space-x-2">
@@ -295,41 +383,37 @@ export default function DashboardPage() {
                       )}
                       
                       <div className="flex space-x-1">
-                        <button 
-                          className="p-2 text-gray-400 hover:text-gray-600"
-                          title="View property"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button 
-                          className="p-2 text-gray-400 hover:text-gray-600"
-                          title={property.isPublished ? "Edit property" : "Edit pending property"}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        {!property.isPaid && (
-                          <button 
-                            onClick={() => {
-                              // Redirect to payment for this property
-                              router.push(`/pay/${property.id}`)
-                            }}
-                            className="px-3 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700"
-                            title="Pay listing fee to activate"
-                          >
-                            Pay $50
-                          </button>
-                        )}
-                        {property.subscriptionStatus === 'expired' && (
-                          <button 
-                            onClick={() => {
-                              router.push(`/pay/${property.id}`)
-                            }}
-                            className="px-3 py-1 text-xs bg-orange-600 text-white rounded hover:bg-orange-700"
-                            title="Renew listing for another year"
-                          >
-                            Renew
-                          </button>
-                        )}
+                        {property.id ? (
+                          <>
+                            <Link
+                              href={`/dashboard/properties/${property.id}`}
+                              className="p-2 text-gray-400 hover:text-gray-600"
+                              title="View listing preview"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Link>
+                            <Link
+                              href={`/dashboard/properties/${property.id}/edit`}
+                              className="p-2 text-gray-400 hover:text-gray-600"
+                              title={property.isPublished ? 'Edit property' : 'Edit pending property'}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Link>
+                          </>
+                        ) : null}
+                        {getPropertySubscriptionState(property) !== 'active' && property.id ? (
+                          <SubscribePropertyButton
+                            propertyId={property.id}
+                            propertyTitle={property.title}
+                            label={
+                              property.subscriptionStatus === 'expired' ? 'Renew $50/yr' : 'Pay $50/yr'
+                            }
+                            variant={
+                              property.subscriptionStatus === 'expired' ? 'renew' : 'primary'
+                            }
+                            className="shrink-0"
+                          />
+                        ) : null}
                       </div>
                     </div>
                   </div>

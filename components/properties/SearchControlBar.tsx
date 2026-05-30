@@ -1,6 +1,6 @@
 'use client'
 
-import { Search, SlidersHorizontal, Users, Map, LayoutGrid, List } from 'lucide-react'
+import { Search, SlidersHorizontal, Users, Map, LayoutGrid, List, PawPrint } from 'lucide-react'
 import type { BrowseView } from '@/lib/property-browse'
 
 interface SearchControlBarProps {
@@ -85,9 +85,23 @@ export default function SearchControlBar({
 
           <button
             type="button"
+            onClick={() => onPetsChange(!petsOnly)}
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition-colors active:scale-95 ${
+              petsOnly
+                ? 'bg-forest-800 text-white shadow-sm'
+                : 'bg-stone-100/90 text-stone-700'
+            }`}
+            aria-pressed={petsOnly}
+            aria-label="Pet-friendly stays only"
+          >
+            <PawPrint className="h-4 w-4" />
+          </button>
+
+          <button
+            type="button"
             onClick={onMoreFilters}
             className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-stone-100/90 text-stone-700 active:scale-95 transition-transform"
-            aria-label="Filters"
+            aria-label="More filters"
           >
             <SlidersHorizontal className="h-4 w-4" />
             {activeFilterCount > 0 && (

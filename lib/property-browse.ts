@@ -38,21 +38,6 @@ export const BROWSE_CATEGORIES = [
   { id: 'stargazing', label: 'Stargazing', icon: '🌌', tags: ['Stargazing', 'Romantic', 'Off-the-Grid'] },
 ] as const
 
-/** Shown in the horizontal category scroller */
-export const PRIMARY_BROWSE_CATEGORY_IDS = [
-  'forest',
-  'hot-tub',
-  'adventure',
-  'off-grid',
-  'luxury',
-  'family',
-] as const
-
-/** Romantic, stargazing, etc. — surfaced in More Filters */
-export const SECONDARY_BROWSE_CATEGORIES = BROWSE_CATEGORIES.filter(
-  (c) => !PRIMARY_BROWSE_CATEGORY_IDS.includes(c.id as (typeof PRIMARY_BROWSE_CATEGORY_IDS)[number])
-)
-
 const EMOTIONAL_BY_TAG: Record<string, string> = {
   Luxury: 'Elevated canopy escape',
   Romantic: 'Perfect for couples',
