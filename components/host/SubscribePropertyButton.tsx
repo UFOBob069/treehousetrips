@@ -56,10 +56,10 @@ export function SubscribePropertyButton({
 
   const variantClass =
     variant === 'renew'
-      ? 'bg-orange-600 hover:bg-orange-700 text-white'
+      ? 'bg-amber-muted hover:bg-amber-warm text-forest-950'
       : variant === 'secondary'
-        ? 'border border-forest-300 bg-white text-forest-800 hover:bg-forest-50'
-        : 'bg-forest-800 hover:bg-forest-900 text-white'
+        ? 'border border-stone-200/80 bg-white text-forest-800 hover:bg-stone-100/80'
+        : 'bg-forest-800 hover:bg-forest-700 text-white'
 
   return (
     <div className={className}>
@@ -67,7 +67,7 @@ export function SubscribePropertyButton({
         type="button"
         onClick={handleSubscribe}
         disabled={loading || disabled || missingId}
-        className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${variantClass}`}
+        className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${variantClass}`}
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
         {loading ? 'Opening checkout…' : label}

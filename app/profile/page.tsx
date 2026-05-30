@@ -88,22 +88,22 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="text-center">
-          <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Please Sign In</h2>
-          <p className="text-gray-600 mb-4">You need to be logged in to access your profile.</p>
+          <AlertCircle className="mx-auto h-12 w-12 text-stone-400 mb-4" />
+          <h2 className="font-serif text-2xl text-forest-950 mb-2">Please sign in</h2>
+          <p className="text-stone-600 mb-4">You need to be logged in to access your profile.</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="pb-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link
           href="/dashboard"
-          className="mb-6 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-stone-600 hover:text-forest-950"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to dashboard
@@ -111,8 +111,9 @@ export default function ProfilePage() {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-          <p className="text-gray-600 mt-2">Manage your account information and preferences</p>
+          <p className="text-moss text-sm tracking-widest uppercase mb-1">Account</p>
+          <h1 className="font-serif text-3xl text-forest-950 tracking-tight">Profile settings</h1>
+          <p className="text-stone-600 mt-2">Manage your account information and preferences</p>
         </div>
 
         {/* Success/Error Messages */}
@@ -134,14 +135,14 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Info */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
+            <div className="bg-[#fffcf7] rounded-2xl border border-stone-200/60 shadow-[0_8px_30px_rgba(26,43,26,0.06)]">
+              <div className="px-6 py-4 border-b border-stone-200/60">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
+                  <h2 className="font-serif text-lg text-forest-950">Personal information</h2>
                   {!isEditing && (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="flex items-center text-primary-600 hover:text-primary-700"
+                      className="flex items-center text-forest-800 hover:text-forest-700"
                     >
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
@@ -154,7 +155,7 @@ export default function ProfilePage() {
                 {/* Profile Picture */}
                 <div className="flex items-center space-x-4">
                   <div className="relative">
-                    <div className="h-20 w-20 bg-primary-100 rounded-full flex items-center justify-center">
+                    <div className="h-20 w-20 bg-forest-100 rounded-full flex items-center justify-center">
                       {user.photoURL ? (
                         <img
                           src={user.photoURL}
@@ -162,27 +163,27 @@ export default function ProfilePage() {
                           className="h-20 w-20 rounded-full object-cover"
                         />
                       ) : (
-                        <UserIcon className="h-8 w-8 text-primary-600" />
+                        <UserIcon className="h-8 w-8 text-forest-800" />
                       )}
                     </div>
                     {isEditing && (
-                      <button className="absolute -bottom-1 -right-1 bg-primary-600 text-white p-1 rounded-full hover:bg-primary-700">
+                      <button className="absolute -bottom-1 -right-1 bg-forest-800 text-white p-1 rounded-full hover:bg-forest-700">
                         <Camera className="h-3 w-3" />
                       </button>
                     )}
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium text-forest-950">
                       {profileData.displayName || 'Your Name'}
                     </h3>
-                    <p className="text-gray-600">{profileData.email}</p>
+                    <p className="text-stone-600">{profileData.email}</p>
                   </div>
                 </div>
 
                 {/* Form Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       Display Name
                     </label>
                     <input
@@ -190,12 +191,12 @@ export default function ProfilePage() {
                       value={profileData.displayName}
                       onChange={(e) => setProfileData(prev => ({ ...prev, displayName: e.target.value }))}
                       disabled={!isEditing}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50"
+                      className="w-full px-3 py-2 border border-stone-200/80 rounded-lg focus:ring-2 focus:ring-forest-600/30 focus:border-transparent disabled:pb-12"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       Email
                     </label>
                     <input
@@ -203,12 +204,12 @@ export default function ProfilePage() {
                       value={profileData.email}
                       onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
                       disabled={!isEditing}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50"
+                      className="w-full px-3 py-2 border border-stone-200/80 rounded-lg focus:ring-2 focus:ring-forest-600/30 focus:border-transparent disabled:pb-12"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       Phone Number
                     </label>
                     <input
@@ -217,12 +218,12 @@ export default function ProfilePage() {
                       onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
                       disabled={!isEditing}
                       placeholder="+1 (555) 123-4567"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50"
+                      className="w-full px-3 py-2 border border-stone-200/80 rounded-lg focus:ring-2 focus:ring-forest-600/30 focus:border-transparent disabled:pb-12"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       Location
                     </label>
                     <input
@@ -231,12 +232,12 @@ export default function ProfilePage() {
                       onChange={(e) => setProfileData(prev => ({ ...prev, location: e.target.value }))}
                       disabled={!isEditing}
                       placeholder="City, State, Country"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50"
+                      className="w-full px-3 py-2 border border-stone-200/80 rounded-lg focus:ring-2 focus:ring-forest-600/30 focus:border-transparent disabled:pb-12"
                     />
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       Bio
                     </label>
                     <textarea
@@ -245,12 +246,12 @@ export default function ProfilePage() {
                       disabled={!isEditing}
                       rows={4}
                       placeholder="Tell us about yourself..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50"
+                      className="w-full px-3 py-2 border border-stone-200/80 rounded-lg focus:ring-2 focus:ring-forest-600/30 focus:border-transparent disabled:pb-12"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       Website
                     </label>
                     <input
@@ -259,7 +260,7 @@ export default function ProfilePage() {
                       onChange={(e) => setProfileData(prev => ({ ...prev, website: e.target.value }))}
                       disabled={!isEditing}
                       placeholder="https://yourwebsite.com"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50"
+                      className="w-full px-3 py-2 border border-stone-200/80 rounded-lg focus:ring-2 focus:ring-forest-600/30 focus:border-transparent disabled:pb-12"
                     />
                   </div>
 
@@ -270,9 +271,9 @@ export default function ProfilePage() {
                       checked={profileData.isHost}
                       onChange={(e) => setProfileData(prev => ({ ...prev, isHost: e.target.checked }))}
                       disabled={!isEditing}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-forest-800 focus:ring-forest-600/30 border-stone-200/80 rounded"
                     />
-                    <label htmlFor="isHost" className="ml-2 text-sm text-gray-700">
+                    <label htmlFor="isHost" className="ml-2 text-sm text-stone-700">
                       I am a host
                     </label>
                   </div>
@@ -280,7 +281,7 @@ export default function ProfilePage() {
 
                 {/* Action Buttons */}
                 {isEditing && (
-                  <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                  <div className="flex justify-end space-x-4 pt-4 border-t border-stone-200/60">
                     <button
                       onClick={() => {
                         setIsEditing(false)
@@ -294,14 +295,14 @@ export default function ProfilePage() {
                           isHost: false
                         })
                       }}
-                      className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      className="px-4 py-2 text-stone-700 border border-stone-200/80 rounded-lg hover:pb-12"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                      className="flex items-center px-4 py-2 rounded-full bg-forest-800 text-white text-sm font-medium hover:bg-forest-700 disabled:opacity-50"
                     >
                       {saving ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -318,25 +319,25 @@ export default function ProfilePage() {
 
           {/* Account Actions */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">Account</h3>
+            <div className="bg-[#fffcf7] rounded-2xl border border-stone-200/60 shadow-[0_8px_30px_rgba(26,43,26,0.06)]">
+              <div className="px-6 py-4 border-b border-stone-200/60">
+                <h3 className="font-serif text-lg text-forest-950">Account</h3>
               </div>
               <div className="p-6 space-y-4">
-                <div className="flex items-center text-sm text-gray-600">
+                <div className="flex items-center text-sm text-stone-600">
                   <Calendar className="h-4 w-4 mr-2" />
                   Member since {new Date().toLocaleDateString()}
                 </div>
-                <div className="flex items-center text-sm text-gray-600">
+                <div className="flex items-center text-sm text-stone-600">
                   <Mail className="h-4 w-4 mr-2" />
                   {user.email}
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">Actions</h3>
+            <div className="bg-[#fffcf7] rounded-2xl border border-stone-200/60 shadow-[0_8px_30px_rgba(26,43,26,0.06)]">
+              <div className="px-6 py-4 border-b border-stone-200/60">
+                <h3 className="font-serif text-lg text-forest-950">Actions</h3>
               </div>
               <div className="p-6">
                 <button

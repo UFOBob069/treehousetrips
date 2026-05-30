@@ -42,7 +42,10 @@ const PROPERTY_WRITE_KEYS = [
   'price',
   'contactEmail',
   'contactPhone',
+  'showContactEmail',
+  'showContactPhone',
   'airbnbUrl',
+  'bookingLinks',
   'images',
   'tags',
   'guests',
@@ -97,6 +100,11 @@ export const COLLECTIONS = {
   MESSAGES: 'messages',
 } as const
 
+export interface BookingLink {
+  label: string
+  url: string
+}
+
 // Property types
 export interface Property {
   id?: string
@@ -111,7 +119,13 @@ export interface Property {
   price: number
   contactEmail: string
   contactPhone?: string
+  /** When true, email is shown on the listing and in the message-host flow */
+  showContactEmail?: boolean
+  /** When true, phone is shown on the listing and in the message-host flow */
+  showContactPhone?: boolean
   airbnbUrl?: string
+  /** Optional extra booking links (direct site, VRBO, etc.) */
+  bookingLinks?: BookingLink[]
   images: string[]
   tags: string[]
   guests: number

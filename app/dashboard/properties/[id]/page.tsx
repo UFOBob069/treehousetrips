@@ -55,11 +55,11 @@ export default function HostPropertyPreviewPage() {
     : null
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="pb-12">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <Link
           href="/dashboard"
-          className="mb-6 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-stone-600 hover:text-forest-950"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to dashboard
@@ -76,8 +76,8 @@ export default function HostPropertyPreviewPage() {
           <>
             <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{property.title}</h1>
-                <p className="mt-1 flex items-center gap-1 text-gray-600">
+                <h1 className="font-serif text-2xl text-forest-950">{property.title}</h1>
+                <p className="mt-1 flex items-center gap-1 text-stone-600">
                   <MapPin className="h-4 w-4 shrink-0" />
                   {property.location}
                 </p>
@@ -90,7 +90,7 @@ export default function HostPropertyPreviewPage() {
               <div className="flex gap-2">
                 <Link
                   href={`/dashboard/properties/${property.id}/edit`}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="inline-flex items-center gap-2 rounded-full border border-stone-200/80 bg-white/80 px-4 py-2 text-sm font-medium text-forest-900 hover:bg-stone-100/80"
                 >
                   <Edit className="h-4 w-4" />
                   Edit
@@ -100,7 +100,7 @@ export default function HostPropertyPreviewPage() {
                     href={publicPath}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg bg-forest-800 px-4 py-2 text-sm font-medium text-white hover:bg-forest-900"
+                    className="inline-flex items-center gap-2 rounded-full bg-forest-800 px-4 py-2 text-sm font-medium text-white hover:bg-forest-700"
                   >
                     <ExternalLink className="h-4 w-4" />
                     Public page

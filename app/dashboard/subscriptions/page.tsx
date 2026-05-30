@@ -149,7 +149,7 @@ export default function DashboardSubscriptionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="pb-12">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
           href="/dashboard"
@@ -172,7 +172,8 @@ export default function DashboardSubscriptionsPage() {
         ) : null}
 
         <header className="mb-8">
-          <h1 className="font-serif text-3xl font-bold text-stone-900">Listing subscriptions</h1>
+          <p className="text-moss text-sm tracking-widest uppercase mb-1">Billing</p>
+          <h1 className="font-serif text-3xl text-forest-950 tracking-tight">Listing subscriptions</h1>
           <p className="mt-2 text-stone-600">
             Each treehouse needs its own $50/year subscription to appear on Treehouse Trips. Manage
             activation and renewal per property below.
@@ -191,7 +192,7 @@ export default function DashboardSubscriptionsPage() {
         <HostSubscriptionPitch />
 
         <section className="mt-12">
-          <h2 className="text-lg font-semibold text-stone-900">Your listings</h2>
+          <h2 className="font-serif text-lg text-forest-950">Your listings</h2>
           <p className="mt-1 text-sm text-stone-600">
             Activate or renew each property individually. Checkout is secure via Stripe.
           </p>
@@ -201,7 +202,7 @@ export default function DashboardSubscriptionsPage() {
           ) : error ? (
             <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>
           ) : properties.length === 0 ? (
-            <div className="mt-8 rounded-xl border border-dashed border-stone-300 bg-white p-8 text-center">
+            <div className="mt-8 rounded-2xl border border-dashed border-stone-300/80 bg-[#fffcf7] p-8 text-center">
               <Home className="mx-auto h-10 w-10 text-stone-400" />
               <p className="mt-3 font-medium text-stone-900">No listings yet</p>
               <p className="mt-1 text-sm text-stone-600">
@@ -209,7 +210,7 @@ export default function DashboardSubscriptionsPage() {
               </p>
               <Link
                 href="/create"
-                className="mt-4 inline-block rounded-lg bg-forest-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-forest-900"
+                className="mt-4 inline-block rounded-full bg-forest-800 px-5 py-2.5 text-sm font-medium text-white hover:bg-forest-700"
               >
                 List a treehouse
               </Link>
@@ -225,8 +226,8 @@ export default function DashboardSubscriptionsPage() {
                   <li
                     key={property.id}
                     ref={isHighlighted ? highlightRef : undefined}
-                    className={`rounded-xl border bg-white p-5 shadow-sm transition-shadow ${
-                      isHighlighted ? 'border-forest-400 ring-2 ring-forest-200' : 'border-stone-200'
+                    className={`rounded-2xl border bg-[#fffcf7] p-5 shadow-[0_8px_30px_rgba(26,43,26,0.06)] transition-shadow ${
+                      isHighlighted ? 'border-forest-400 ring-2 ring-forest-200' : 'border-stone-200/60'
                     }`}
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Users, Bed, Bath, ExternalLink, MessageCircle, ArrowLeft, Heart, Share, Star, Shield, Wifi, Car, Coffee, Mountain, Waves, Phone } from 'lucide-react'
+import { MapPin, Users, Bed, Bath, ExternalLink, MessageCircle, ArrowLeft, Heart, Share, Star, Shield, Wifi, Car, Coffee, Mountain, Waves, Phone, Mail } from 'lucide-react'
+import type { BookingLink } from '@/lib/firestore'
 import TreehouseFeatures from './TreehouseFeatures'
 import TreehouseStats from './TreehouseStats'
 import TreehouseExperience from './TreehouseExperience'
@@ -17,7 +18,7 @@ interface Property {
   location: string
   lat: number
   lng: number
-  airbnbUrl: string
+  airbnbUrl?: string
   hostEmail: string
   images: string[]
   tags: string[]
@@ -29,6 +30,9 @@ interface Property {
   title: string
   contactEmail: string
   contactPhone?: string
+  showContactEmail?: boolean
+  showContactPhone?: boolean
+  bookingLinks?: BookingLink[]
   exactAddress?: string
   isPublished: boolean
 }
@@ -241,11 +245,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     </div>
                   </div>
 
-                  {(property.contactEmail || property.contactPhone) && (
+                  {((property.showContactEmail && property.contactEmail) ||
+                    (property.showContactPhone && property.contactPhone)) && (
                     <div className="mt-4 pt-4 border-t border-gray-200 space-y-2 text-sm">
-                      {property.contactEmail && (
-                        <p className="text-gray-600">
-                          <span className="font-medium text-gray-800">Email:</span>{' '}
+                      {property.showContactEmail && property.contactEmail && (
+                        <p className="text-gray-600 flex items-center gap-1.5">
+                          <Mail size={14} className="text-gray-400 shrink-0" />
                           <a
                             href={`mailto:${property.contactEmail}`}
                             className="text-forest-600 hover:underline"
@@ -254,7 +259,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                           </a>
                         </p>
                       )}
-                      {property.contactPhone && (
+                      {property.showContactPhone && property.contactPhone && (
                         <p className="text-gray-600 flex items-center gap-1.5">
                           <Phone size={14} className="text-gray-400 shrink-0" />
                           <a
@@ -270,15 +275,31 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 </div>
 
                 <div className="space-y-3 mb-6">
-                  <Link
-                    href={property.airbnbUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full bg-forest-600 text-white py-3 rounded-lg font-semibold hover:bg-forest-700 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <ExternalLink size={18} />
-                    Book on Airbnb
-                  </Link>
+                  {property.airbnbUrl?.trim() ? (
+                    <Link
+                      href={property.airbnbUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-forest-600 text-white py-3 rounded-lg font-semibold hover:bg-forest-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <ExternalLink size={18} />
+                      Book on Airbnb
+                    </Link>
+                  ) : null}
+                  {property.bookingLinks?.map((link, i) =>
+                    link.url?.trim() ? (
+                      <Link
+                        key={`${link.label}-${i}`}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full border border-forest-600 text-forest-800 py-3 rounded-lg font-semibold hover:bg-forest-50 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ExternalLink size={18} />
+                        {link.label?.trim() || 'Book stay'}
+                      </Link>
+                    ) : null
+                  )}
                   
                   <button
                     onClick={() => setShowContactModal(true)}
@@ -307,7 +328,10 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           price: typeof property.price === 'string' ? parseInt(property.price.replace(/[^0-9]/g, '')) : property.price,
           contactEmail: property.contactEmail || property.hostEmail,
           ...(property.contactPhone ? { contactPhone: property.contactPhone } : {}),
-          airbnbUrl: property.airbnbUrl,
+          showContactEmail: property.showContactEmail,
+          showContactPhone: property.showContactPhone,
+          ...(property.airbnbUrl ? { airbnbUrl: property.airbnbUrl } : {}),
+          ...(property.bookingLinks ? { bookingLinks: property.bookingLinks } : {}),
           images: property.images,
           tags: property.tags,
           guests: property.guests,

@@ -118,7 +118,9 @@ html {
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  background-color: #faf8f5;
+  color: #1a2b1a;
 }
 
 .leaflet-container {

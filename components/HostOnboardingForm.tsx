@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { createProperty, getProperty, Property, updateProperty } from '@/lib/firestore'
+import { createProperty, getProperty, Property, updateProperty, type BookingLink } from '@/lib/firestore'
+import ListingImageManager from '@/components/host/ListingImageManager'
 import { MapPin, Link, Edit3, Save, Eye, Loader2, CheckCircle, AlertCircle, ArrowRight, ChevronLeft } from 'lucide-react'
 import AddressAutocomplete from './AddressAutocomplete'
 import { BROWSE_CATEGORIES, slugify } from '@/lib/property-browse'
@@ -41,7 +42,10 @@ interface ListingFormData {
   price: number
   contactEmail: string
   contactPhone: string
+  showContactEmail: boolean
+  showContactPhone: boolean
   airbnbUrl: string
+  bookingLinks: BookingLink[]
   images: string[]
   tags: string[]
   guests: number
@@ -65,7 +69,10 @@ const createEmptyFormData = (email = ''): ListingFormData => ({
   price: 0,
   contactEmail: email,
   contactPhone: '',
+  showContactEmail: false,
+  showContactPhone: false,
   airbnbUrl: '',
+  bookingLinks: [],
   images: [],
   tags: [],
   guests: 0,
@@ -88,7 +95,10 @@ function propertyToFormData(property: Property, fallbackEmail = ''): ListingForm
     price: property.price ?? 0,
     contactEmail: property.contactEmail || fallbackEmail,
     contactPhone: property.contactPhone || '',
+    showContactEmail: property.showContactEmail ?? false,
+    showContactPhone: property.showContactPhone ?? false,
     airbnbUrl: property.airbnbUrl || '',
+    bookingLinks: property.bookingLinks || [],
     images: property.images || [],
     tags: property.tags || [],
     guests: property.guests ?? 0,
@@ -291,7 +301,16 @@ export default function HostOnboardingForm({
         ownerId: user.uid,
         ...(formData.exactAddress.trim() ? { exactAddress: formData.exactAddress.trim() } : {}),
         ...(formData.contactPhone.trim() ? { contactPhone: formData.contactPhone.trim() } : {}),
+        showContactEmail: formData.showContactEmail,
+        showContactPhone: formData.showContactPhone,
         ...(formData.airbnbUrl.trim() ? { airbnbUrl: formData.airbnbUrl.trim() } : {}),
+        ...(formData.bookingLinks.length > 0
+          ? {
+              bookingLinks: formData.bookingLinks.filter(
+                (l) => l.label.trim() && l.url.trim()
+              ),
+            }
+          : {}),
         ...(formData.subscriptionStatus ? { subscriptionStatus: formData.subscriptionStatus } : {}),
         ...(typeof formData.lat === 'number' &&
         typeof formData.lng === 'number' &&
@@ -352,26 +371,33 @@ export default function HostOnboardingForm({
     }))
   }
 
-  const addImage = (url: string) => {
-    if (url.trim() && !formData.images.includes(url.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, url.trim()]
-      }))
-    }
+  const addBookingLink = () => {
+    setFormData((prev) => ({
+      ...prev,
+      bookingLinks: [...prev.bookingLinks, { label: '', url: '' }],
+    }))
   }
 
-  const removeImage = (index: number) => {
-    setFormData(prev => ({
+  const updateBookingLink = (index: number, field: 'label' | 'url', value: string) => {
+    setFormData((prev) => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      bookingLinks: prev.bookingLinks.map((link, i) =>
+        i === index ? { ...link, [field]: value } : link
+      ),
+    }))
+  }
+
+  const removeBookingLink = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      bookingLinks: prev.bookingLinks.filter((_, i) => i !== index),
     }))
   }
 
   if (loadingExisting) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-forest-800" />
       </div>
     )
   }
@@ -398,13 +424,13 @@ export default function HostOnboardingForm({
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4">
+        <div className="bg-gradient-to-r from-forest-800 to-forest-700 px-6 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-white">
                 {isEditing ? 'Edit your listing' : 'Create your listing'}
               </h1>
-              <p className="text-primary-100">
+              <p className="text-forest-100">
                 {isEditing
                   ? 'Update photos, description, and details for your treehouse'
                   : mode === 'import'
@@ -416,7 +442,7 @@ export default function HostOnboardingForm({
               <button
                 type="button"
                 onClick={onBack}
-                className="text-sm text-primary-100 hover:text-white underline shrink-0"
+                className="text-sm text-forest-100 hover:text-white underline shrink-0"
               >
                 Change method
               </button>
@@ -428,21 +454,21 @@ export default function HostOnboardingForm({
         <div className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
             {mode === 'import' && (
-              <div className={`flex items-center ${step === 'url' ? 'text-primary-600' : 'text-gray-400'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'url' ? 'bg-primary-600 text-white' : 'bg-gray-200'}`}>
+              <div className={`flex items-center ${step === 'url' ? 'text-forest-800' : 'text-gray-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'url' ? 'bg-forest-800 text-white' : 'bg-gray-200'}`}>
                   1
                 </div>
                 <span className="ml-2 font-medium hidden sm:inline">Import</span>
               </div>
             )}
-            <div className={`flex items-center ${step === 'edit' ? 'text-primary-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'edit' ? 'bg-primary-600 text-white' : 'bg-gray-200'}`}>
+            <div className={`flex items-center ${step === 'edit' ? 'text-forest-800' : 'text-gray-400'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'edit' ? 'bg-forest-800 text-white' : 'bg-gray-200'}`}>
                 {mode === 'import' ? 2 : 1}
               </div>
               <span className="ml-2 font-medium hidden sm:inline">Details</span>
             </div>
-            <div className={`flex items-center ${step === 'preview' ? 'text-primary-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'preview' ? 'bg-primary-600 text-white' : 'bg-gray-200'}`}>
+            <div className={`flex items-center ${step === 'preview' ? 'text-forest-800' : 'text-gray-400'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'preview' ? 'bg-forest-800 text-white' : 'bg-gray-200'}`}>
                 {mode === 'import' ? 3 : 2}
               </div>
               <span className="ml-2 font-medium hidden sm:inline">Preview</span>
@@ -454,7 +480,7 @@ export default function HostOnboardingForm({
         {step === 'url' && (
           <div className="p-6">
             <div className="text-center mb-8">
-              <Link className="mx-auto h-12 w-12 text-primary-600 mb-4" />
+              <Link className="mx-auto h-12 w-12 text-forest-800 mb-4" />
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Import Your Airbnb Listing</h2>
               <p className="text-gray-600">Paste your Airbnb listing URL below to automatically import all the details</p>
             </div>
@@ -470,12 +496,12 @@ export default function HostOnboardingForm({
                     value={airbnbUrl}
                     onChange={(e) => setAirbnbUrl(e.target.value)}
                     placeholder="https://www.airbnb.com/rooms/..."
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                   />
                   <button
                     onClick={handleScrape}
                     disabled={loading || !airbnbUrl}
-                    className="px-6 py-3 bg-primary-600 text-white rounded-r-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    className="px-6 py-3 bg-forest-800 text-white rounded-r-lg hover:bg-forest-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                   >
                     {loading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -495,7 +521,7 @@ export default function HostOnboardingForm({
                   </div>
                   <button
                     onClick={() => setStep('edit')}
-                    className="text-sm text-primary-600 hover:text-primary-700 underline"
+                    className="text-sm text-forest-800 hover:text-forest-700 underline"
                   >
                     Continue with manual entry instead
                   </button>
@@ -551,7 +577,7 @@ export default function HostOnboardingForm({
                         }
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                   />
                 </div>
 
@@ -570,7 +596,7 @@ export default function HostOnboardingForm({
                         setFormData((prev) => ({ ...prev, slug: slugify(e.target.value) }))
                       }
                       placeholder="my-treehouse"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                       inputMode="text"
                       autoComplete="off"
                     />
@@ -586,7 +612,7 @@ export default function HostOnboardingForm({
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                   />
                 </div>
 
@@ -596,7 +622,7 @@ export default function HostOnboardingForm({
                     type="text"
                     value={formData.location}
                     onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                   />
                 </div>
 
@@ -637,12 +663,16 @@ export default function HostOnboardingForm({
                       }))
                     }}
                     placeholder="Enter price"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                   />
                 </div>
 
                 <div className="space-y-4 pt-2">
                   <h4 className="text-sm font-medium text-gray-900">Contact information</h4>
+                  <p className="text-xs text-gray-500">
+                    Used for platform messaging. Choose what travelers can see on your listing and
+                    when they message you.
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Contact email</label>
@@ -650,9 +680,20 @@ export default function HostOnboardingForm({
                         type="email"
                         value={formData.contactEmail}
                         onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                         required
                       />
+                      <label className="mt-2 flex items-start gap-2 text-sm text-stone-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.showContactEmail}
+                          onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, showContactEmail: e.target.checked }))
+                          }
+                          className="mt-0.5 h-4 w-4 rounded border-stone-300 text-forest-800 focus:ring-forest-600"
+                        />
+                        <span>Show email on listing &amp; message host</span>
+                      </label>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Contact phone</label>
@@ -662,11 +703,70 @@ export default function HostOnboardingForm({
                         onChange={(e) => setFormData(prev => ({ ...prev, contactPhone: e.target.value }))}
                         placeholder="+1 (555) 123-4567"
                         autoComplete="tel"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Optional — shown to guests who contact you</p>
+                      <label className="mt-2 flex items-start gap-2 text-sm text-stone-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.showContactPhone}
+                          onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, showContactPhone: e.target.checked }))
+                          }
+                          className="mt-0.5 h-4 w-4 rounded border-stone-300 text-forest-800 focus:ring-forest-600"
+                        />
+                        <span>Show phone on listing &amp; message host</span>
+                      </label>
                     </div>
                   </div>
+                </div>
+
+                <div className="space-y-4 pt-2 border-t border-gray-200">
+                  <h4 className="text-sm font-medium text-gray-900">Where guests can book</h4>
+                  <p className="text-xs text-gray-500">
+                    Airbnb is optional. Add any other links you use (direct booking, VRBO, your website).
+                  </p>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Airbnb listing URL</label>
+                    <input
+                      type="url"
+                      value={formData.airbnbUrl}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, airbnbUrl: e.target.value }))}
+                      placeholder="https://airbnb.com/rooms/…"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
+                    />
+                  </div>
+                  {formData.bookingLinks.map((link, index) => (
+                    <div key={index} className="flex flex-col sm:flex-row gap-2 items-start">
+                      <input
+                        type="text"
+                        value={link.label}
+                        onChange={(e) => updateBookingLink(index, 'label', e.target.value)}
+                        placeholder="Label (e.g. Book direct)"
+                        className="sm:w-40 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-forest-600 focus:border-transparent"
+                      />
+                      <input
+                        type="url"
+                        value={link.url}
+                        onChange={(e) => updateBookingLink(index, 'url', e.target.value)}
+                        placeholder="https://…"
+                        className="flex-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-forest-600 focus:border-transparent"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeBookingLink(index)}
+                        className="text-sm text-red-600 hover:text-red-800 px-2 py-2"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addBookingLink}
+                    className="text-sm font-medium text-forest-800 hover:text-forest-700"
+                  >
+                    + Add another booking link
+                  </button>
                 </div>
               </div>
 
@@ -681,7 +781,7 @@ export default function HostOnboardingForm({
                       type="number"
                       value={formData.guests}
                       onChange={(e) => setFormData(prev => ({ ...prev, guests: parseInt(e.target.value) || 0 }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                     />
                   </div>
                   <div>
@@ -690,7 +790,7 @@ export default function HostOnboardingForm({
                       type="number"
                       value={formData.bedrooms}
                       onChange={(e) => setFormData(prev => ({ ...prev, bedrooms: parseInt(e.target.value) || 0 }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                     />
                   </div>
                   <div>
@@ -699,7 +799,7 @@ export default function HostOnboardingForm({
                       type="number"
                       value={formData.bathrooms}
                       onChange={(e) => setFormData(prev => ({ ...prev, bathrooms: parseInt(e.target.value) || 0 }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -739,12 +839,12 @@ export default function HostOnboardingForm({
                     {formData.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="inline-flex items-center px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm"
+                        className="inline-flex items-center px-3 py-1 bg-forest-100 text-primary-800 rounded-full text-sm"
                       >
                         {tag}
                         <button
                           onClick={() => removeTag(index)}
-                          className="ml-2 text-primary-600 hover:text-primary-800"
+                          className="ml-2 text-forest-800 hover:text-primary-800"
                         >
                           ×
                         </button>
@@ -760,42 +860,18 @@ export default function HostOnboardingForm({
                         e.currentTarget.value = ''
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-600 focus:border-transparent"
                   />
                 </div>
 
-                {/* Images */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Images</label>
-                  <div className="grid grid-cols-2 gap-2 mb-2">
-                    {formData.images.map((image, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={image}
-                          alt={`Property ${index + 1}`}
-                          className="w-full h-20 object-cover rounded-lg"
-                        />
-                        <button
-                          onClick={() => removeImage(index)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <input
-                    type="url"
-                    placeholder="Add image URL (press Enter)"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        addImage(e.currentTarget.value)
-                        e.currentTarget.value = ''
-                      }
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                {user && (
+                  <ListingImageManager
+                    images={formData.images}
+                    onChange={(images) => setFormData((prev) => ({ ...prev, images }))}
+                    userId={user.uid}
+                    propertyId={editPropertyId}
                   />
-                </div>
+                )}
               </div>
             </div>
 
@@ -816,7 +892,7 @@ export default function HostOnboardingForm({
               <button
                 type="button"
                 onClick={() => setStep('preview')}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 shadow-sm"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-forest-800 text-white rounded-lg font-semibold hover:bg-forest-700 shadow-sm"
               >
                 <Eye className="h-5 w-5" />
                 Continue to preview
@@ -854,17 +930,30 @@ export default function HostOnboardingForm({
                       📍 {formData.exactAddress}
                     </div>
                   )}
-                  <div className="text-2xl font-bold text-primary-600">${formData.price}/night</div>
+                  <div className="text-2xl font-bold text-forest-800">${formData.price}/night</div>
                   <div className="mt-4 space-y-1 text-sm text-gray-600">
                     <p>
                       <span className="font-medium text-gray-700">Email:</span>{' '}
                       {formData.contactEmail || '—'}
+                      {formData.showContactEmail ? ' (visible to guests)' : ' (hidden)'}
                     </p>
                     {formData.contactPhone.trim() && (
                       <p>
                         <span className="font-medium text-gray-700">Phone:</span>{' '}
                         {formData.contactPhone}
+                        {formData.showContactPhone ? ' (visible to guests)' : ' (hidden)'}
                       </p>
+                    )}
+                    {(formData.airbnbUrl || formData.bookingLinks.length > 0) && (
+                      <div className="pt-2">
+                        <span className="font-medium text-gray-700">Booking links:</span>
+                        <ul className="mt-1 list-disc list-inside">
+                          {formData.airbnbUrl.trim() && <li>Airbnb</li>}
+                          {formData.bookingLinks.map((l, i) =>
+                            l.label.trim() ? <li key={i}>{l.label}</li> : null
+                          )}
+                        </ul>
+                      </div>
                     )}
                   </div>
 
@@ -902,7 +991,7 @@ export default function HostOnboardingForm({
                       {formData.tags.map((tag, index) => (
                         <span
                           key={index}
-                          className="px-2 py-1 bg-primary-100 text-primary-800 rounded text-sm"
+                          className="px-2 py-1 bg-forest-100 text-primary-800 rounded text-sm"
                         >
                           {tag}
                         </span>
@@ -957,7 +1046,7 @@ export default function HostOnboardingForm({
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="flex items-center px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                  className="flex items-center px-6 py-2 bg-forest-800 text-white rounded-lg hover:bg-forest-700 disabled:opacity-50"
                 >
                   {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />

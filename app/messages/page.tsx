@@ -13,27 +13,28 @@ export default function MessagesPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="text-center">
-          <MessageCircle className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign In Required</h2>
-          <p className="text-gray-600">Please sign in to access your messages.</p>
+          <MessageCircle className="h-16 w-16 text-stone-300 mx-auto mb-4" />
+          <h2 className="font-serif text-2xl text-forest-950 mb-2">Sign in required</h2>
+          <p className="text-stone-600">Please sign in to access your messages.</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Messages</h1>
-          <p className="text-gray-600">
+          <p className="text-moss text-sm tracking-widest uppercase mb-1">Inbox</p>
+          <h1 className="font-serif text-3xl text-forest-950 tracking-tight mb-2">Messages</h1>
+          <p className="text-stone-600">
             Manage conversations with travelers interested in your properties.
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-[#fffcf7] rounded-2xl border border-stone-200/60 shadow-[0_8px_30px_rgba(26,43,26,0.08)] overflow-hidden">
           {selectedConversation ? (
             <ConversationView
               conversation={selectedConversation}
