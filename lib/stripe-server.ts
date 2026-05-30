@@ -22,7 +22,13 @@ export function getAppBaseUrl(request: NextRequest): string {
   return 'http://localhost:3000'
 }
 
-export function listingSubscriptionLineItem(propertyTitle: string): Stripe.Checkout.SessionCreateParams.LineItem {
+const LISTING_BENEFITS_BLURB =
+  'One $50 charge today, then once per year — not monthly. Includes map & search placement, your listing page, and guest messaging. No commission on Airbnb bookings.'
+
+export function listingSubscriptionLineItem(
+  propertyTitle: string,
+  productImageUrl?: string
+): Stripe.Checkout.SessionCreateParams.LineItem {
   const priceId = process.env.STRIPE_SUBSCRIPTION_PRICE_ID
   const useConfiguredPrice =
     priceId && priceId.startsWith('price_') && !priceId.includes('xxxx')
@@ -31,6 +37,9 @@ export function listingSubscriptionLineItem(propertyTitle: string): Stripe.Check
     return { price: priceId, quantity: 1 }
   }
 
+  const listing = propertyTitle.trim() || 'your treehouse'
+  const image = productImageUrl?.trim()
+
   return {
     quantity: 1,
     price_data: {
@@ -38,8 +47,13 @@ export function listingSubscriptionLineItem(propertyTitle: string): Stripe.Check
       unit_amount: 5000,
       recurring: { interval: 'year' },
       product_data: {
-        name: 'Treehouse Trips — Annual Listing',
-        description: `Annual subscription for “${propertyTitle}”`,
+        name: 'Annual host listing — $50/year (one payment)',
+        description: `${LISTING_BENEFITS_BLURB}\n\nListing: “${listing}”`,
+        ...(image ? { images: [image] } : {}),
+        metadata: {
+          propertyTitle: listing,
+          billing: 'annual_single_charge',
+        },
       },
     },
   }

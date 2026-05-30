@@ -11,9 +11,17 @@ interface ContactHostModalProps {
   onClose: () => void
   property: Property
   onSuccess?: () => void
+  /** Opens sign-in when guest tries to message without an account. */
+  onRequestSignIn?: () => void
 }
 
-export default function ContactHostModal({ isOpen, onClose, property, onSuccess }: ContactHostModalProps) {
+export default function ContactHostModal({
+  isOpen,
+  onClose,
+  property,
+  onSuccess,
+  onRequestSignIn,
+}: ContactHostModalProps) {
   const { user } = useAuth()
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -91,7 +99,7 @@ export default function ContactHostModal({ isOpen, onClose, property, onSuccess 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto bg-black/50 backdrop-blur-sm p-4 sm:items-center">
       <div className="bg-[#fffcf7] rounded-3xl border border-stone-200/60 shadow-[0_24px_60px_rgba(26,43,26,0.15)] max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -124,22 +132,42 @@ export default function ContactHostModal({ isOpen, onClose, property, onSuccess 
                 Your message was sent through Treehouse Trips. The host can reply in Messages.
               </p>
             </div>
+          ) : !user ? (
+            <div className="space-y-4 py-2">
+              <div className="bg-forest-50 border border-forest-200/80 rounded-xl p-4">
+                <p className="text-forest-900 text-sm leading-relaxed">
+                  Sign in to send a message. Your email stays private until you reach out — hosts reply in
+                  Messages.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 px-4 py-2.5 border border-stone-200/80 text-stone-700 rounded-full hover:bg-stone-100/80 transition-colors text-sm font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose()
+                    onRequestSignIn?.()
+                  }}
+                  className="flex-1 px-4 py-2.5 bg-forest-800 text-white rounded-full hover:bg-forest-700 transition-colors text-sm font-medium"
+                >
+                  Sign in
+                </button>
+              </div>
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {!user ? (
-                <div className="bg-forest-50 border border-forest-200/80 rounded-xl p-4">
-                  <p className="text-forest-900 text-sm">
-                    Please sign in to contact the host. This keeps your email private and secure.
-                  </p>
+              <div className="bg-stone-100/80 rounded-xl p-4">
+                <div className="flex items-center gap-2 text-sm text-stone-600">
+                  <User className="h-4 w-4" />
+                  <span>Sending as: {user.displayName || user.email}</span>
                 </div>
-              ) : (
-                <div className="bg-stone-100/80 rounded-xl p-4">
-                  <div className="flex items-center gap-2 text-sm text-stone-600">
-                    <User className="h-4 w-4" />
-                    <span>Sending as: {user.displayName || user.email}</span>
-                  </div>
-                </div>
-              )}
+              </div>
 
               {hasHostContact && (
                 <div className="rounded-xl border border-stone-200/80 bg-white p-4 space-y-2">

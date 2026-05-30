@@ -10,6 +10,7 @@ interface AuthContextType {
   firestoreUser: FirestoreUser | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ user: User | null; error: string | null }>
+  signInWithGoogle: () => Promise<{ user: User | null; error: string | null }>
   signUp: (email: string, password: string, displayName?: string) => Promise<{ user: User | null; error: string | null }>
   signOut: () => Promise<{ error: string | null }>
 }
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setFirestoreUser(userData)
         } else if (error === 'User not found') {
           // Create user in Firestore if doesn't exist
-          const { id, error: createError } = await createUser({
+          const { id, error: createError } = await createUser(user.uid, {
             email: user.email!,
             displayName: user.displayName || undefined,
             photoURL: user.photoURL || undefined,
@@ -78,6 +79,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return await signInUser(email, password)
   }
 
+  const signInWithGoogle = async () => {
+    const { signInWithGoogle: googleSignIn } = await import('@/lib/auth')
+    return await googleSignIn()
+  }
+
   const signUp = async (email: string, password: string, displayName?: string) => {
     const { signUp: signUpUser } = await import('@/lib/auth')
     return await signUpUser(email, password, displayName)
@@ -93,6 +99,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     firestoreUser,
     loading,
     signIn,
+    signInWithGoogle,
     signUp,
     signOut,
   }

@@ -1,6 +1,8 @@
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
   onAuthStateChanged,
   User,
@@ -25,6 +27,23 @@ export const signUp = async (email: string, password: string, displayName?: stri
     return { user: userCredential.user, error: null }
   } catch (error: any) {
     return { user: null, error: error.message }
+  }
+}
+
+// Sign in with Google (enable Google provider in Firebase Console → Authentication)
+export const signInWithGoogle = async () => {
+  try {
+    const provider = new GoogleAuthProvider()
+    provider.setCustomParameters({ prompt: 'select_account' })
+    const userCredential = await signInWithPopup(auth, provider)
+    return { user: userCredential.user, error: null }
+  } catch (error: unknown) {
+    const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : ''
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      return { user: null, error: null }
+    }
+    const message = error instanceof Error ? error.message : 'Google sign-in failed'
+    return { user: null, error: message }
   }
 }
 

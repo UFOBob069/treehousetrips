@@ -4,6 +4,7 @@ import {
   getDoc,
   getDocs,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -261,14 +262,19 @@ export const deleteProperty = async (id: string) => {
 }
 
 // User operations
-export const createUser = async (userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => {
+/** Creates a Firestore profile keyed by Firebase Auth UID. */
+export const createUser = async (
+  userId: string,
+  userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>
+) => {
   try {
-    const docRef = await addDoc(collection(db, COLLECTIONS.USERS), {
-      ...userData,
+    const docRef = doc(db, COLLECTIONS.USERS, userId)
+    await setDoc(docRef, {
+      ...stripUndefined(userData as Record<string, unknown>),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
-    return { id: docRef.id, error: null }
+    return { id: userId, error: null }
   } catch (error: any) {
     return { id: null, error: error.message }
   }

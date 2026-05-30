@@ -91,6 +91,7 @@ export default function PayPropertyPage() {
                 />
               )}
               <p className="mt-4 text-xs text-stone-500">
+                One $50 charge today, then $50 once per year when your listing renews — not monthly.
                 You&apos;ll complete payment on Stripe. Manage all listings from{' '}
                 <Link href="/dashboard/subscriptions" className="text-forest-700 underline">
                   subscriptions

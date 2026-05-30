@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAppBaseUrl, getStripe, listingSubscriptionLineItem } from '@/lib/stripe-server'
+import { getAppBaseUrl, getStripe } from '@/lib/stripe-server'
+import { buildHostListingCheckoutSession } from '@/lib/stripe-host-checkout-session'
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,27 +20,15 @@ export async function POST(request: NextRequest) {
     const stripe = getStripe()
     const baseUrl = getAppBaseUrl(request)
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [listingSubscriptionLineItem(propertyTitle)],
-      mode: 'subscription',
-      success_url: `${baseUrl}/dashboard/subscriptions?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/dashboard/subscriptions?payment=cancelled&property=${encodeURIComponent(propertyId)}`,
-      ...(customerEmail ? { customer_email: customerEmail } : {}),
-      metadata: {
+    const session = await stripe.checkout.sessions.create(
+      buildHostListingCheckoutSession({
+        baseUrl,
         userId,
         propertyId,
         propertyTitle,
-        type: 'annual_subscription',
-      },
-      subscription_data: {
-        metadata: {
-          userId,
-          propertyId,
-          propertyTitle,
-        },
-      },
-    })
+        customerEmail,
+      })
+    )
 
     if (!session.url) {
       return NextResponse.json({ error: 'Stripe did not return a checkout URL' }, { status: 500 })

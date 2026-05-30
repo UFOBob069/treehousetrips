@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
 import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin, Users, Bed, Bath, ExternalLink, MessageCircle, ArrowLeft, Heart, Share, Star, Shield, Wifi, Car, Coffee, Mountain, Waves, Phone, Mail } from 'lucide-react'
@@ -10,6 +11,7 @@ import TreehouseStats from './TreehouseStats'
 import TreehouseExperience from './TreehouseExperience'
 import TreehouseHero from './TreehouseHero'
 import ContactHostModal from './ContactHostModal'
+import AuthModal from './AuthModal'
 
 interface Property {
   id: string
@@ -42,9 +44,29 @@ interface PropertyDetailProps {
 }
 
 export default function PropertyDetail({ property }: PropertyDetailProps) {
+  const { user } = useAuth()
   const [selectedImage, setSelectedImage] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [pendingContactAfterAuth, setPendingContactAfterAuth] = useState(false)
+
+  function handleMessageHost() {
+    if (!user) {
+      setPendingContactAfterAuth(true)
+      setShowAuthModal(true)
+      return
+    }
+    setShowContactModal(true)
+  }
+
+  useEffect(() => {
+    if (user && pendingContactAfterAuth) {
+      setShowAuthModal(false)
+      setPendingContactAfterAuth(false)
+      setShowContactModal(true)
+    }
+  }, [user, pendingContactAfterAuth])
 
   // Ensure selectedImage is always within bounds
   const safeSelectedImage = Math.min(selectedImage, property.images.length - 1)
@@ -302,7 +324,8 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   )}
                   
                   <button
-                    onClick={() => setShowContactModal(true)}
+                    type="button"
+                    onClick={handleMessageHost}
                     className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
                   >
                     <MessageCircle size={18} />
@@ -315,10 +338,23 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
         </div>
       </div>
 
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false)
+          setPendingContactAfterAuth(false)
+        }}
+        contextMessage={`Sign in to message the host of “${property.title || property.name}”. Your contact details stay private until you send a message.`}
+      />
+
       {/* Contact Host Modal */}
       <ContactHostModal
         isOpen={showContactModal}
         onClose={() => setShowContactModal(false)}
+        onRequestSignIn={() => {
+          setPendingContactAfterAuth(true)
+          setShowAuthModal(true)
+        }}
         property={{
           id: property.id,
           title: property.title || property.name,

@@ -23,7 +23,7 @@ const VALUE_POINTS = [
     icon: Shield,
     title: 'Low risk, cancel anytime',
     description:
-      'About $4/month billed annually. You keep full control of pricing and bookings on Airbnb — we drive discovery, not commissions on your stays.',
+      'One $50 payment per year — not monthly billing. You keep full control of pricing and bookings on Airbnb; we drive discovery, not commissions on your stays.',
   },
 ] as const
 
@@ -60,7 +60,7 @@ export function HostSubscriptionPitch({ compact = false }: { compact?: boolean }
             </div>
             <p className="mt-2 text-4xl font-bold text-forest-900">$50</p>
             <p className="text-sm text-stone-500">per property / year</p>
-            <p className="mt-2 text-xs text-stone-500">≈ $4.17/month</p>
+            <p className="mt-2 text-xs font-medium text-forest-700">Billed once per year</p>
           </div>
         </div>
       </div>

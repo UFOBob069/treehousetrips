@@ -1,0 +1,86 @@
+import Stripe from 'stripe'
+import { listingSubscriptionLineItem } from '@/lib/stripe-server'
+
+/** Hosted image for product card on Stripe Checkout (HTTPS required). */
+const DEFAULT_CHECKOUT_PRODUCT_IMAGE =
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=800&fit=crop'
+
+export function getCheckoutLogoUrl(): string | undefined {
+  const fromEnv = process.env.STRIPE_CHECKOUT_LOGO_URL?.trim()
+  return fromEnv || undefined
+}
+
+function checkoutBranding(): Stripe.Checkout.SessionCreateParams.BrandingSettings {
+  const logoUrl = getCheckoutLogoUrl()
+  return {
+    display_name: 'Treehouse Trips',
+    background_color: '#faf8f5',
+    button_color: '#3a5636',
+    border_style: 'rounded',
+    font_family: 'lora',
+    ...(logoUrl
+      ? {
+          logo: { type: 'url' as const, url: logoUrl },
+        }
+      : {}),
+  }
+}
+
+function checkoutCustomText(propertyTitle: string): Stripe.Checkout.SessionCreateParams.CustomText {
+  const listing = propertyTitle.trim() || 'your treehouse'
+  return {
+    submit: {
+      message:
+        'You pay $50 today — one charge, not monthly. Your listing renews once per year at $50 unless you cancel before renewal.',
+    },
+    after_submit: {
+      message:
+        `Secure checkout by Stripe. Questions? support@treehousetrips.com · Manage your listing anytime from your host dashboard.`,
+    },
+    terms_of_service_acceptance: {
+      message:
+        'By subscribing you agree to our annual listing terms. You can cancel before your next renewal from your dashboard.',
+    },
+  }
+}
+
+export function buildHostListingCheckoutSession(
+  opts: {
+    baseUrl: string
+    userId: string
+    propertyId: string
+    propertyTitle: string
+    customerEmail?: string
+  }
+): Stripe.Checkout.SessionCreateParams {
+  const { baseUrl, userId, propertyId, propertyTitle, customerEmail } = opts
+  const listing = propertyTitle.trim() || 'your treehouse'
+
+  return {
+    payment_method_types: ['card'],
+    line_items: [listingSubscriptionLineItem(propertyTitle, DEFAULT_CHECKOUT_PRODUCT_IMAGE)],
+    mode: 'subscription',
+    success_url: `${baseUrl}/dashboard/subscriptions?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/dashboard/subscriptions?payment=cancelled&property=${encodeURIComponent(propertyId)}`,
+    ...(customerEmail ? { customer_email: customerEmail } : {}),
+    branding_settings: checkoutBranding(),
+    custom_text: checkoutCustomText(propertyTitle),
+    consent_collection: {
+      payment_method_reuse_agreement: { position: 'hidden' },
+    },
+    metadata: {
+      userId,
+      propertyId,
+      propertyTitle: listing,
+      type: 'annual_subscription',
+    },
+    subscription_data: {
+      description: `Annual listing for “${listing}” — $50/year, billed once per year`,
+      metadata: {
+        userId,
+        propertyId,
+        propertyTitle: listing,
+      },
+    },
+  }
+}
