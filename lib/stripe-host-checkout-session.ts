@@ -1,10 +1,6 @@
 import Stripe from 'stripe'
 import { listingSubscriptionLineItem } from '@/lib/stripe-server'
 
-/** Hosted image for product card on Stripe Checkout (HTTPS required). */
-const DEFAULT_CHECKOUT_PRODUCT_IMAGE =
-  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=800&fit=crop'
-
 export function getCheckoutLogoUrl(): string | undefined {
   const fromEnv = process.env.STRIPE_CHECKOUT_LOGO_URL?.trim()
   return fromEnv || undefined
@@ -17,7 +13,6 @@ function checkoutBranding(): Stripe.Checkout.SessionCreateParams.BrandingSetting
     background_color: '#faf8f5',
     button_color: '#3a5636',
     border_style: 'rounded',
-    font_family: 'lora',
     ...(logoUrl
       ? {
           logo: { type: 'url' as const, url: logoUrl },
@@ -54,7 +49,7 @@ export function buildHostListingCheckoutSession(
 
   return {
     payment_method_types: ['card'],
-    line_items: [listingSubscriptionLineItem(propertyTitle, DEFAULT_CHECKOUT_PRODUCT_IMAGE)],
+    line_items: [listingSubscriptionLineItem(propertyTitle, null)],
     mode: 'subscription',
     success_url: `${baseUrl}/dashboard/subscriptions?payment=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/dashboard/subscriptions?payment=cancelled&property=${encodeURIComponent(propertyId)}`,

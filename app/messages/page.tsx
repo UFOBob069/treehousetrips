@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Conversation } from '@/lib/firestore'
 import MessagingInbox from '@/components/MessagingInbox'
 import ConversationView from '@/components/ConversationView'
-import { MessageCircle } from 'lucide-react'
+import SignInGate from '@/components/SignInGate'
 
 export default function MessagesPage() {
   const { user } = useAuth()
@@ -13,13 +13,10 @@ export default function MessagesPage() {
 
   if (!user) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center px-4">
-        <div className="text-center">
-          <MessageCircle className="h-16 w-16 text-stone-300 mx-auto mb-4" />
-          <h2 className="font-serif text-2xl text-forest-950 mb-2">Sign in required</h2>
-          <p className="text-stone-600">Please sign in to access your messages.</p>
-        </div>
-      </div>
+      <SignInGate
+        contextLine="Message hosts about stays you love, or reply to travelers interested in your treehouse."
+        authMessage="Sign in to view and send messages on Treehouse Trips."
+      />
     )
   }
 

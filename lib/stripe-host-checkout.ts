@@ -32,21 +32,7 @@ export async function startHostListingCheckout(params: {
   }
 
   if (data.url) {
-    window.location.assign(data.url)
-    return
-  }
-
-  if (data.sessionId) {
-    const { loadStripe } = await import('@stripe/stripe-js')
-    const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-    if (!publishableKey) {
-      throw new Error('Stripe is not configured (missing publishable key).')
-    }
-    const stripe = await loadStripe(publishableKey)
-    if (!stripe) throw new Error('Failed to load Stripe')
-
-    const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId })
-    if (error) throw new Error(error.message)
+    window.location.replace(data.url)
     return
   }
 

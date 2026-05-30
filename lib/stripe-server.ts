@@ -1,14 +1,20 @@
 import { NextRequest } from 'next/server'
 import Stripe from 'stripe'
 
+let stripeSingleton: Stripe | null = null
+
 export function getStripe() {
   const secret = process.env.STRIPE_SECRET_KEY
   if (!secret) {
     throw new Error('STRIPE_SECRET_KEY is not configured')
   }
-  return new Stripe(secret, {
-    apiVersion: '2025-09-30.clover',
-  })
+  if (!stripeSingleton) {
+    stripeSingleton = new Stripe(secret, {
+      apiVersion: '2025-09-30.clover',
+      maxNetworkRetries: 1,
+    })
+  }
+  return stripeSingleton
 }
 
 export function getAppBaseUrl(request: NextRequest): string {
@@ -23,11 +29,11 @@ export function getAppBaseUrl(request: NextRequest): string {
 }
 
 const LISTING_BENEFITS_BLURB =
-  'One $50 charge today, then once per year — not monthly. Includes map & search placement, your listing page, and guest messaging. No commission on Airbnb bookings.'
+  'One $50 charge today, then once per year — not monthly. Includes map & search placement, your listing page, and guest messaging. You keep your existing booking links — we do not take a commission on stays.'
 
 export function listingSubscriptionLineItem(
   propertyTitle: string,
-  productImageUrl?: string
+  productImageUrl?: string | null
 ): Stripe.Checkout.SessionCreateParams.LineItem {
   const priceId = process.env.STRIPE_SUBSCRIPTION_PRICE_ID
   const useConfiguredPrice =
@@ -38,7 +44,10 @@ export function listingSubscriptionLineItem(
   }
 
   const listing = propertyTitle.trim() || 'your treehouse'
-  const image = productImageUrl?.trim()
+  const image =
+    productImageUrl === null
+      ? undefined
+      : (productImageUrl ?? process.env.STRIPE_CHECKOUT_PRODUCT_IMAGE)?.trim()
 
   return {
     quantity: 1,
@@ -47,7 +56,7 @@ export function listingSubscriptionLineItem(
       unit_amount: 5000,
       recurring: { interval: 'year' },
       product_data: {
-        name: 'Annual host listing — $50/year (one payment)',
+        name: 'Annual host listing — $50/year',
         description: `${LISTING_BENEFITS_BLURB}\n\nListing: “${listing}”`,
         ...(image ? { images: [image] } : {}),
         metadata: {

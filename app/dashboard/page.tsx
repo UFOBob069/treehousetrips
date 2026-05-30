@@ -25,6 +25,7 @@ import {
   SubscribePropertyButton,
 } from '@/components/host/SubscribePropertyButton'
 import Link from 'next/link'
+import SignInGate from '@/components/SignInGate'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -65,19 +66,10 @@ export default function DashboardPage() {
 
   if (!user) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <AlertCircle className="mx-auto h-12 w-12 text-stone-400 mb-4" />
-          <h2 className="font-serif text-2xl text-forest-950 mb-2">Please sign in</h2>
-          <p className="text-stone-600 mb-6">You need to be logged in to access your dashboard.</p>
-          <Link
-            href="/create"
-            className="inline-flex rounded-full bg-forest-800 text-white px-6 py-3 text-sm font-medium hover:bg-forest-700 transition-colors"
-          >
-            Sign in
-          </Link>
-        </div>
-      </div>
+      <SignInGate
+        contextLine="Your dashboard brings together saved stays, messages, and every treehouse you list — one account for travelers and hosts."
+        authMessage="Sign in to open your host dashboard, manage listings, and keep traveler conversations in one place."
+      />
     )
   }
 

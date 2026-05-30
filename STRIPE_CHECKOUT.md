@@ -20,8 +20,9 @@ Code applies on each session:
 
 - Cream background `#faf8f5`
 - Forest green button `#3a5636`
-- Serif font (`lora`)
+- Default Stripe font (faster load than custom webfonts)
 - Display name: **Treehouse Trips**
+- No product hero image by default (faster Checkout). Optional: `STRIPE_CHECKOUT_PRODUCT_IMAGE=https://…`
 
 Optional logo (HTTPS, square PNG recommended):
 
@@ -36,7 +37,7 @@ You can also set default branding under [Checkout branding](https://dashboard.st
 If you use a fixed Price from the Dashboard, update the **Product** there too:
 
 - **Name:** `Annual host listing — $50/year (one payment)`
-- **Description:** One $50 charge per year, not monthly. Map placement, listing page, guest messaging. No commission on Airbnb bookings.
+- **Description:** One $50 charge per year, not monthly. Map placement, listing page, guest messaging. No commission on your bookings.
 
 Dynamic `price_data` in code already uses this copy when no price ID is set.
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import SignInGate from '@/components/SignInGate'
 import { useSearchParams } from 'next/navigation'
 import {
   AlertCircle,
@@ -137,14 +138,10 @@ export default function DashboardSubscriptionsPage() {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-stone-50">
-        <div className="text-center">
-          <p className="text-stone-600">Please sign in to manage listing subscriptions.</p>
-          <Link href="/create" className="mt-4 inline-block text-forest-700 underline">
-            Sign in
-          </Link>
-        </div>
-      </div>
+      <SignInGate
+        contextLine="Hosts: manage your $50/year listing subscriptions and keep properties live on Treehouse Trips."
+        authMessage="Sign in to activate or renew your treehouse listing subscription."
+      />
     )
   }
 

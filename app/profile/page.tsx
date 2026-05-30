@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { updateUser } from '@/lib/firestore'
 import { User } from '@/lib/firestore'
 import Link from 'next/link'
+import SignInGate from '@/components/SignInGate'
 import { 
   User as UserIcon, 
   Mail, 
@@ -88,13 +89,10 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center px-4">
-        <div className="text-center">
-          <AlertCircle className="mx-auto h-12 w-12 text-stone-400 mb-4" />
-          <h2 className="font-serif text-2xl text-forest-950 mb-2">Please sign in</h2>
-          <p className="text-stone-600 mb-4">You need to be logged in to access your profile.</p>
-        </div>
-      </div>
+      <SignInGate
+        contextLine="Update your profile so hosts and travelers know who they are connecting with."
+        authMessage="Sign in to edit your profile and account settings."
+      />
     )
   }
 
