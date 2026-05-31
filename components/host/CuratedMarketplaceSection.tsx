@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { SITE_IMAGES } from '@/lib/site-images'
 
 export default function CuratedMarketplaceSection() {
   return (
@@ -7,7 +8,7 @@ export default function CuratedMarketplaceSection() {
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div className="relative aspect-[4/5] md:aspect-[3/4] rounded-3xl overflow-hidden shadow-[0_24px_60px_rgba(26,43,26,0.12)] order-2 lg:order-1">
             <Image
-              src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=900&q=80"
+              src={SITE_IMAGES.hostMarketplace}
               alt="Luxury treehouse interior with warm light"
               fill
               className="object-cover"

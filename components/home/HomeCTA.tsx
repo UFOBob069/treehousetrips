@@ -11,12 +11,20 @@ export default function HomeCTA() {
         <p className="mt-4 text-white/70 text-base md:text-lg">
           Hand-curated stays. No ordinary weekends.
         </p>
-        <Link
-          href="/properties"
-          className="mt-8 inline-flex rounded-full bg-amber-muted px-8 py-3.5 text-sm md:text-base font-medium text-forest-950 hover:bg-amber-warm transition-colors shadow-lg"
-        >
-          Explore all stays
-        </Link>
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link
+            href="/properties"
+            className="inline-flex w-full sm:w-auto justify-center rounded-full bg-amber-muted px-8 py-3.5 text-sm md:text-base font-medium text-forest-950 hover:bg-amber-warm transition-colors shadow-lg"
+          >
+            Explore all stays
+          </Link>
+          <Link
+            href="/create"
+            className="inline-flex w-full sm:w-auto justify-center rounded-full border border-white/30 bg-white/10 px-8 py-3.5 text-sm md:text-base font-medium text-white backdrop-blur-sm hover:bg-white/20 transition-colors"
+          >
+            List your treehouse
+          </Link>
+        </div>
       </div>
     </section>
   )

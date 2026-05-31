@@ -1,23 +1,24 @@
-/** Host landing page — editorial copy and imagery */
+/** Host landing page — editorial copy and imagery from /public */
 
-export const HOST_HERO_IMAGE =
-  'https://images.unsplash.com/photo-1518173941125-8b84c33f1799?w=1920&q=85'
+import { SITE_IMAGES } from '@/lib/site-images'
+
+export const HOST_HERO_IMAGE = SITE_IMAGES.hostHero
 
 export const WHY_LIST_POINTS = [
   {
     title: 'Travelers come for treehouses',
     copy: 'Guests arrive with intent — they are not browsing generic vacation rentals. They want canopy nights, rope bridges, and forest mornings.',
-    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=900&q=80',
+    image: '/collection-rainforest-hideaways-900.png',
   },
   {
     title: 'Niche beats buried',
     copy: 'On broad platforms, unique stays disappear in the noise. A focused marketplace gives your property room to breathe and be remembered.',
-    image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a8fe05?w=900&q=80',
+    image: '/destination-lakeside-treehouse-dock-800.png',
   },
   {
     title: 'Emotion drives bookings',
     copy: 'Treehouse travelers choose experiences, not square footage. Story-driven listings perform better where discovery is curated, not commoditized.',
-    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=900&q=80',
+    image: '/collection-interior-bedroom-windows-900.png',
   },
 ] as const
 
@@ -26,37 +27,37 @@ export const HOST_BENEFITS = [
     id: 'direct',
     title: 'Direct Communication',
     copy: 'Build relationships with interested travelers — conversations that feel personal, not transactional.',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+    image: '/host-benefit-direct-communication-800.png',
   },
   {
     id: 'curated',
     title: 'Curated Discovery',
     copy: 'Stand out in a marketplace built around extraordinary stays, not thousands of lookalike listings.',
-    image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80',
+    image: '/host-benefit-curated-discovery-800.png',
   },
   {
     id: 'premium',
     title: 'Premium Presentation',
     copy: 'Showcase your treehouse with cinematic imagery and storytelling that matches the magic of the stay.',
-    image: 'https://images.unsplash.com/photo-1518173941125-8b84c33f1799?w=800&q=80',
+    image: '/host-benefit-premium-presentation-800.png',
   },
   {
     id: 'intent',
     title: 'High-Intent Travelers',
     copy: 'Reach guests actively searching for memorable treehouse experiences — not accidental clicks.',
-    image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a8fe05?w=800&q=80',
+    image: '/host-benefit-high-intent-travelers-800.png',
   },
   {
     id: 'niche',
     title: 'Niche Visibility',
     copy: 'Avoid competing with urban apartments and beach condos. Your category is the entire point.',
-    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
+    image: '/host-benefit-niche-visibility-800.png',
   },
   {
     id: 'shareable',
     title: 'More Shareable',
     copy: 'Beautiful listings travelers actually send to friends — the kind of stays that spread by word of mouth.',
-    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80',
+    image: '/host-benefit-shareable-listings-800.png',
   },
 ] as const
 
@@ -83,25 +84,25 @@ export const EXAMPLE_LISTINGS = [
     name: 'Forest Canopy Retreat',
     location: 'Pacific Northwest',
     tagline: 'Mist, cedar, and morning light',
-    image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a8fe05?w=700&q=80',
+    image: '/destination-pacific-northwest-800.png',
   },
   {
     name: 'Off-Grid Cabin',
     location: 'Big Sur, California',
     tagline: 'Solar-powered serenity among the redwoods',
-    image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=700&q=80',
+    image: '/collection-off-grid-escapes-900.png',
   },
   {
     name: 'Luxury Glass Treehouse',
     location: 'Asheville, North Carolina',
     tagline: 'Elevated design above the canopy',
-    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=700&q=80',
+    image: '/collection-interior-bedroom-windows-900.png',
   },
   {
     name: 'Family Adventure Stay',
     location: 'Smoky Mountains',
     tagline: 'Platforms, bridges, and stories for years',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80',
+    image: '/story-suspension-bridge-family-memories-1000.png',
   },
 ] as const
 

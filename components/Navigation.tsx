@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Menu, X, Search, User, LogOut, Settings, Home, MessageCircle, Heart } from 'lucide-react'
+import { Menu, X, Search, User, LogOut, Settings, Home, MessageCircle, Heart, TreePine } from 'lucide-react'
 import { useSaves } from '@/contexts/SavesContext'
 import { useAuth } from '../contexts/AuthContext'
 import AuthModal from './AuthModal'
@@ -180,11 +180,26 @@ export default function Navigation() {
               )}
             </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile: host CTA on homepage + menu */}
+          <div className="md:hidden flex items-center gap-2">
+            {pathname === '/' && (
+              <Link
+                href="/create"
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition-colors ${
+                  transparentNav
+                    ? 'bg-amber-warm/95 text-forest-950 shadow-md hover:bg-amber-warm'
+                    : 'bg-forest-800 text-white hover:bg-forest-700'
+                }`}
+              >
+                <TreePine className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                List yours
+              </Link>
+            )}
             <button
+              type="button"
               onClick={() => setIsOpen(!isOpen)}
               className={`p-2 transition-colors ${transparentNav ? 'text-white' : 'text-stone-700 hover:text-forest-800'}`}
+              aria-label={isOpen ? 'Close menu' : 'Open menu'}
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -196,26 +211,30 @@ export default function Navigation() {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-            <Link 
-              href="/" 
+            <Link
+              href="/create"
+              className="mx-3 mb-3 flex items-center justify-center gap-2 rounded-full bg-forest-800 px-4 py-3.5 text-base font-semibold text-white hover:bg-forest-700 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <TreePine className="h-5 w-5" aria-hidden />
+              List your treehouse
+            </Link>
+            <p className="mx-3 mb-3 text-center text-xs text-stone-500">
+              $50/year · Reach travelers looking for canopy stays
+            </p>
+            <Link
+              href="/"
               className="text-gray-700 hover:text-forest-600 block px-3 py-2 text-base font-medium"
               onClick={() => setIsOpen(false)}
             >
               Home
             </Link>
-            <Link 
-              href="/properties" 
+            <Link
+              href="/properties"
               className="text-gray-700 hover:text-forest-600 block px-3 py-2 text-base font-medium"
               onClick={() => setIsOpen(false)}
             >
-              Browse Properties
-            </Link>
-            <Link 
-              href="/create" 
-              className="bg-forest-800 text-white block px-4 py-2 rounded-full text-base font-medium hover:bg-forest-700 transition-colors mx-3 mb-3"
-              onClick={() => setIsOpen(false)}
-            >
-              List Your Treehouse
+              Browse properties
             </Link>
             <Link 
               href="/about" 

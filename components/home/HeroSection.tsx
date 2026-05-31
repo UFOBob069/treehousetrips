@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Play } from 'lucide-react'
+import { Play, TreePine } from 'lucide-react'
 import { HERO_IMAGE } from '@/lib/home-content'
 import FloatingSearchBar from './FloatingSearchBar'
 
@@ -36,25 +36,38 @@ export default function HeroSection() {
             unforgettable escapes.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href="/properties"
-              className="inline-flex items-center justify-center rounded-full bg-forest-700 px-7 py-3.5 text-sm md:text-base font-medium text-white hover:bg-forest-600 shadow-lg shadow-forest-950/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="inline-flex w-full sm:w-auto items-center justify-center rounded-full bg-forest-700 px-7 py-3.5 text-sm md:text-base font-medium text-white hover:bg-forest-600 shadow-lg shadow-forest-950/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              Explore Stays
+              Explore stays
+            </Link>
+            <Link
+              href="/create"
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border-2 border-amber-warm/80 bg-amber-warm/95 px-7 py-3.5 text-sm md:text-base font-semibold text-forest-950 shadow-lg shadow-forest-950/20 hover:bg-amber-warm transition-all active:scale-[0.98]"
+            >
+              <TreePine className="h-4 w-4 shrink-0" aria-hidden />
+              List your treehouse
             </Link>
             <Link
               href="/properties"
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-sm md:text-base font-medium text-white backdrop-blur-sm hover:bg-white/20 transition-all"
+              className="hidden md:inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-sm md:text-base font-medium text-white backdrop-blur-sm hover:bg-white/20 transition-all"
             >
               <Play className="h-4 w-4 fill-current" />
-              View Retreats
+              View retreats
             </Link>
           </div>
         </div>
 
         <div className="mt-10 md:mt-14 animate-fade-in opacity-0 [animation-delay:400ms] [animation-fill-mode:forwards]">
           <FloatingSearchBar />
+          <p className="mt-4 text-center text-sm text-white/75 md:hidden">
+            Own a treehouse?{' '}
+            <Link href="/create" className="font-semibold text-amber-warm underline underline-offset-2">
+              Get listed for $50/year
+            </Link>
+          </p>
         </div>
       </div>
     </section>

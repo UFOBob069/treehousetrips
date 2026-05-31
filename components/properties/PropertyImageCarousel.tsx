@@ -18,7 +18,7 @@ export default function PropertyImageCarousel({
 }: PropertyImageCarouselProps) {
   const [index, setIndex] = useState(0)
   const hasMultiple = images.length > 1
-  const safeImages = images.length > 0 ? images : ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800']
+  const safeImages = images.length > 0 ? images : ['/collection-rainforest-hideaways-900.png']
 
   const go = (dir: -1 | 1) => {
     setIndex((prev) => {

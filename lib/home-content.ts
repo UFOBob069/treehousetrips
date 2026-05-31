@@ -1,42 +1,43 @@
-/** Editorial homepage content — imagery-first, minimal copy */
+/** Editorial homepage content — imagery from /public */
 
-export const HERO_IMAGE =
-  'https://images.unsplash.com/photo-1470071459604-3b5ec3a8fe05?w=1920&q=85'
+import { SITE_IMAGES } from '@/lib/site-images'
+
+export const HERO_IMAGE = SITE_IMAGES.hero
 
 export const COLLECTIONS = [
   {
     id: 'romantic',
     title: 'Romantic Retreats',
     subtitle: 'Canopy nights for two',
-    image: 'https://images.unsplash.com/photo-1518173941125-8b84c33f1799?w=900&q=80',
+    image: '/collection-couple-coffee-deck-900.png',
     href: '/properties?collection=romantic',
   },
   {
     id: 'family',
     title: 'Family Adventures',
     subtitle: 'Memories above the forest floor',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80',
+    image: '/collection-family-adventures-900.png',
     href: '/properties?collection=family',
   },
   {
     id: 'off-grid',
     title: 'Off-Grid Escapes',
     subtitle: 'Unplug. Breathe. Belong.',
-    image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=900&q=80',
+    image: '/collection-off-grid-escapes-900.png',
     href: '/properties?collection=off-grid',
   },
   {
     id: 'luxury',
     title: 'Luxury Treehouses',
     subtitle: 'Elevated in every sense',
-    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=900&q=80',
+    image: '/collection-interior-bedroom-windows-900.png',
     href: '/properties?collection=luxury',
   },
   {
     id: 'forest',
     title: 'Rainforest Hideaways',
     subtitle: 'Moss, mist, and morning light',
-    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=900&q=80',
+    image: '/collection-rainforest-hideaways-900.png',
     href: '/properties?collection=forest',
   },
 ] as const
@@ -45,31 +46,31 @@ export const DESTINATIONS = [
   {
     id: 'pnw',
     name: 'Pacific Northwest',
-    image: 'https://images.unsplash.com/photo-1501785880391-215778c125de?w=800&q=80',
+    image: '/destination-pacific-northwest-800.png',
     href: '/properties?search=Oregon',
   },
   {
     id: 'smokies',
     name: 'Smoky Mountains',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+    image: '/destination-smoky-mountains-blue-haze-800.png',
     href: '/properties?search=Carolina',
   },
   {
     id: 'colorado',
     name: 'Colorado',
-    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80',
+    image: '/destination-colorado-winter-firepit-800.png',
     href: '/properties?search=Colorado',
   },
   {
     id: 'redwoods',
     name: 'Redwoods',
-    image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80',
+    image: '/destination-redwoods-800.png',
     href: '/properties?search=California',
   },
   {
     id: 'rainforest',
     name: 'Rainforests',
-    image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a8fe05?w=800&q=80',
+    image: '/destination-rainforests-800.png',
     href: '/properties?collection=forest',
   },
 ] as const
@@ -77,23 +78,23 @@ export const DESTINATIONS = [
 export const STORIES = [
   {
     title: 'Wake up above the forest floor',
-    copy: 'Morning mist drifts through the canopy while coffee steams on your private deck.',
-    image: 'https://images.unsplash.com/photo-1518173941125-8b84c33f1799?w=1000&q=80',
+    copy: 'Golden light spills across the deck while the forest wakes below.',
+    image: '/story-sunrise-deck-scene-1000.png',
   },
   {
     title: 'Disconnect from the world',
-    copy: 'No traffic. No timelines. Just wind in the leaves and stars through the skylight.',
-    image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1000&q=80',
+    copy: 'A reading nook, soft rain, and nowhere else you need to be.',
+    image: '/story-reading-nook-relief-1000.png',
   },
   {
     title: 'Romantic nights under the canopy',
-    copy: 'Firelight, hot tubs, and treehouses built for slow evenings together.',
-    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1000&q=80',
+    copy: 'Firelight, shared blankets, and slow evenings by the pit.',
+    image: '/story-outdoor-fire-pit-connection-1000.png',
   },
   {
     title: 'Adventures kids never forget',
-    copy: 'Rope bridges, zip lines, and secret platforms waiting to be explored.',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000&q=80',
+    copy: 'Suspension bridges, laughter, and memories that last for years.',
+    image: '/story-suspension-bridge-family-memories-1000.png',
   },
 ] as const
 
@@ -101,59 +102,59 @@ export const SEASONAL = [
   {
     id: 'fall',
     title: 'Fall Escapes',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80',
+    image: '/seasonal-fall-700.png',
     href: '/properties',
   },
   {
     id: 'rainy',
     title: 'Rainy Weekend Retreats',
-    image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a8fe05?w=700&q=80',
+    image: '/collection-hot-tub-forest-900.png',
     href: '/properties?collection=hot-tub',
   },
   {
     id: 'winter',
     title: 'Winter Treehouses',
-    image: 'https://images.unsplash.com/photo-1518173941125-8b84c33f1799?w=700&q=80',
+    image: '/seasonal-winter-700.png',
     href: '/properties',
   },
   {
     id: 'summer',
     title: 'Summer Forest Adventures',
-    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=700&q=80',
+    image: '/seasonal-summer-700.png',
     href: '/properties?collection=adventure',
   },
 ] as const
 
 export const BREAK_SECTIONS = [
   {
-    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=85',
+    image: '/quote-break-treehouse-waterfall-v2-1920.png',
     quote: 'Some places don’t just host you — they change you.',
   },
   {
-    image: 'https://images.unsplash.com/photo-1518173941125-8b84c33f1799?w=1920&q=85',
+    image: '/quote-break-treehouse-waterfall-1920.png',
     quote: 'The forest remembers every story told from a treehouse deck.',
   },
 ] as const
 
 export const TRAVELER_MOMENTS = [
   {
-    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&q=80',
-    caption: 'First light through the redwoods',
+    image: '/traveler-moment-hot-tubs-v2-600.png',
+    caption: 'Soak under the stars',
     author: '@canopy.collective',
   },
   {
-    image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a8fe05?w=600&q=80',
-    caption: 'Rain on cedar, coffee in hand',
-    author: '@mist.and.moss',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80',
-    caption: 'Kids discovered the zip line at dawn',
+    image: '/traveler-moment-pet-friendly-600.png',
+    caption: 'Bring the whole pack',
     author: '@treetop.family',
   },
   {
-    image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=80',
-    caption: 'Off-grid, on purpose',
+    image: '/traveler-moment-canopy-bridge-600x750.png',
+    caption: 'Morning on the canopy bridge',
+    author: '@mist.and.moss',
+  },
+  {
+    image: '/traveler-moment-morning-coffee-600x750.png',
+    caption: 'Slow starts above the forest floor',
     author: '@slow.forest',
   },
 ] as const
