@@ -5,11 +5,11 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import AuthModal from '@/components/AuthModal'
 import { ListingMode } from '@/components/ListingMethodChooser'
+import { HOST_PRICE } from '@/lib/host-content'
 import HostHeroSection from './HostHeroSection'
-import WhyListSection from './WhyListSection'
-import BenefitCards from './BenefitCards'
-import AIDiscoverySection from './AIDiscoverySection'
-import CuratedMarketplaceSection from './CuratedMarketplaceSection'
+import HostPricingSection from './HostPricingSection'
+import HostChannelsSection from './HostChannelsSection'
+import WhyHostsJoinSection from './WhyHostsJoinSection'
 import HowItWorks from './HowItWorks'
 import FeaturedHostListings from './FeaturedHostListings'
 import SignupCTASection from './SignupCTASection'
@@ -29,12 +29,8 @@ export default function HostLandingPage() {
   }, [])
 
   const handleListClick = useCallback(() => {
-    if (user) {
-      scrollToGetStarted()
-      return
-    }
     scrollToGetStarted()
-  }, [user, scrollToGetStarted])
+  }, [scrollToGetStarted])
 
   const handleCreateListing = () => {
     if (user) {
@@ -80,6 +76,8 @@ export default function HostLandingPage() {
     }
   }, [user, showAuthModal, onCreateRoute, scrollToGetStarted, router])
 
+  const stickyLabel = user ? `Continue your listing — ${HOST_PRICE}` : `List your treehouse — ${HOST_PRICE}`
+
   return (
     <div className="bg-cream -mt-px">
       <AuthModal
@@ -89,10 +87,9 @@ export default function HostLandingPage() {
       />
 
       <HostHeroSection onListClick={handleListClick} />
-      <WhyListSection />
-      <BenefitCards />
-      <AIDiscoverySection />
-      <CuratedMarketplaceSection />
+      <HostPricingSection />
+      <HostChannelsSection />
+      <WhyHostsJoinSection />
       <HowItWorks />
       <FeaturedHostListings />
       <SignupCTASection
@@ -102,11 +99,7 @@ export default function HostLandingPage() {
         authLoading={authLoading}
       />
 
-      <HostStickyCTA
-        visible={showStickyCta && !authLoading}
-        label={user ? 'Continue your listing' : 'List your treehouse'}
-        onClick={handleListClick}
-      />
+      <HostStickyCTA visible={showStickyCta && !authLoading} label={stickyLabel} onClick={handleListClick} />
     </div>
   )
 }

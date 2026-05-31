@@ -1,34 +1,35 @@
 import { Check, Globe, MessageCircle, Search, Shield, Sparkles, TreePine } from 'lucide-react'
+import { HOST_PRICE } from '@/lib/host-content'
 
 const VALUE_POINTS = [
   {
     icon: Search,
-    title: 'Get discovered by treehouse travelers',
+    title: 'Be where treehouse travelers are looking',
     description:
-      'Your listing appears on our map, category browse, and search — built for guests who specifically want elevated stays, not generic vacation rentals.',
+      'Your listing appears on our map, browse, and search — for guests who specifically want treehouses, not generic vacation rentals.',
   },
   {
     icon: Globe,
-    title: 'Your own branded listing page',
+    title: 'Keep your existing booking channels',
     description:
-      'A dedicated page on Treehouse Trips with photos, story, and a direct path to book on Airbnb. One subscription = one property, live for 12 months.',
+      'Another channel alongside Airbnb, Vrbo, your site, and social. No exclusivity — link out however you already book.',
   },
   {
     icon: MessageCircle,
-    title: 'Direct guest conversations',
+    title: 'Direct inquiries',
     description:
-      'In-app messaging so interested travelers can reach you without hunting through social posts or email threads.',
+      'In-app messaging so interested travelers can reach you without hunting through posts or email threads.',
   },
   {
     icon: Shield,
-    title: 'Low risk, cancel anytime',
+    title: `Only ${HOST_PRICE}`,
     description:
-      'One $50 payment per year — not monthly billing. You keep full control of pricing and bookings on Airbnb; we drive discovery, not commissions on your stays.',
+      'Less than a tank of gas. No commissions, no booking fees, no contracts. One flat annual fee per property.',
   },
 ] as const
 
 const INCLUDED = [
-  '12 months of active listing on Treehouse Trips',
+  `12 months live on Treehouse Trips — ${HOST_PRICE} per property`,
   'Map & category placement across the site',
   'Photo gallery with cover image support',
   'Host dashboard & listing edits anytime',
@@ -43,14 +44,15 @@ export function HostSubscriptionPitch({ compact = false }: { compact?: boolean }
           <div>
             <p className="inline-flex items-center gap-2 rounded-full bg-forest-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-forest-800">
               <Sparkles className="h-3.5 w-3.5" />
-              Host listing subscription
+              Host listing
             </p>
             <h2 className="mt-3 font-serif text-2xl font-bold text-stone-900 md:text-3xl">
-              $50/year per treehouse — less than a single night&apos;s booking
+              Less than a tank of gas — {HOST_PRICE}
             </h2>
             <p className="mt-2 max-w-2xl text-stone-600">
-              Airbnb takes a cut of every stay. Treehouse Trips is a flat annual fee to put your property in front of
-              guests who are already looking for treehouses. No commission on bookings you close on Airbnb.
+              Be everywhere travelers discover treehouses. We&apos;re another channel and another
+              opportunity — not a replacement for Airbnb. No commission on bookings you close
+              elsewhere.
             </p>
           </div>
           <div className="shrink-0 rounded-xl border border-forest-200 bg-white px-5 py-4 text-center shadow-sm">
@@ -60,7 +62,7 @@ export function HostSubscriptionPitch({ compact = false }: { compact?: boolean }
             </div>
             <p className="mt-2 text-4xl font-bold text-forest-900">$50</p>
             <p className="text-sm text-stone-500">per property / year</p>
-            <p className="mt-2 text-xs font-medium text-forest-700">Billed once per year</p>
+            <p className="mt-2 text-xs font-medium text-forest-700">{HOST_PRICE} · billed once per year</p>
           </div>
         </div>
       </div>

@@ -50,7 +50,9 @@ module.exports = {
       },
       backgroundImage: {
         'hero-gradient':
-          'linear-gradient(to bottom, rgba(15,26,16,0.18) 0%, rgba(15,26,16,0.32) 45%, rgba(15,26,16,0.62) 100%)',
+          'linear-gradient(to bottom, rgba(15,26,16,0.12) 0%, rgba(15,26,16,0.26) 45%, rgba(15,26,16,0.52) 100%)',
+        'hero-gradient-mobile':
+          'linear-gradient(to bottom, rgba(15,26,16,0.05) 0%, rgba(15,26,16,0.18) 55%, rgba(15,26,16,0.42) 100%)',
       },
       animation: {
         'ken-burns': 'kenBurns 24s ease-in-out infinite alternate',

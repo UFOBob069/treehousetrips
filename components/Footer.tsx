@@ -19,7 +19,7 @@ export default function Footer() {
               Explore stays
             </Link>
             <Link href="/create" className="text-white/70 hover:text-white transition-colors">
-              List your treehouse
+              List your treehouse — $50/year
             </Link>
             <Link href="/about" className="text-white/70 hover:text-white transition-colors">
               About

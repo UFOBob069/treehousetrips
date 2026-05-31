@@ -4,78 +4,58 @@ import { SITE_IMAGES } from '@/lib/site-images'
 
 export const HOST_HERO_IMAGE = SITE_IMAGES.hostHero
 
-export const WHY_LIST_POINTS = [
-  {
-    title: 'Travelers come for treehouses',
-    copy: 'Guests arrive with intent — they are not browsing generic vacation rentals. They want canopy nights, rope bridges, and forest mornings.',
-    image: '/collection-rainforest-hideaways-900.png',
-  },
-  {
-    title: 'Niche beats buried',
-    copy: 'On broad platforms, unique stays disappear in the noise. A focused marketplace gives your property room to breathe and be remembered.',
-    image: '/destination-lakeside-treehouse-dock-800.png',
-  },
-  {
-    title: 'Emotion drives bookings',
-    copy: 'Treehouse travelers choose experiences, not square footage. Story-driven listings perform better where discovery is curated, not commoditized.',
-    image: '/collection-interior-bedroom-windows-900.png',
-  },
-] as const
+export const HOST_PRICE = '$50/year' as const
 
-export const HOST_BENEFITS = [
+export const WHY_HOSTS_JOIN = [
   {
-    id: 'direct',
-    title: 'Direct Communication',
-    copy: 'Build relationships with interested travelers — conversations that feel personal, not transactional.',
-    image: '/host-benefit-direct-communication-800.png',
-  },
-  {
-    id: 'curated',
-    title: 'Curated Discovery',
-    copy: 'Stand out in a marketplace built around extraordinary stays, not thousands of lookalike listings.',
-    image: '/host-benefit-curated-discovery-800.png',
-  },
-  {
-    id: 'premium',
-    title: 'Premium Presentation',
-    copy: 'Showcase your treehouse with cinematic imagery and storytelling that matches the magic of the stay.',
-    image: '/host-benefit-premium-presentation-800.png',
-  },
-  {
-    id: 'intent',
-    title: 'High-Intent Travelers',
-    copy: 'Reach guests actively searching for memorable treehouse experiences — not accidental clicks.',
+    id: 'reach',
+    title: 'Reach Travelers Looking Specifically For Treehouses',
+    copy: 'Not generic vacation rentals — guests who already want canopy nights, rope bridges, and forest mornings.',
     image: '/host-benefit-high-intent-travelers-800.png',
   },
   {
-    id: 'niche',
-    title: 'Niche Visibility',
-    copy: 'Avoid competing with urban apartments and beach condos. Your category is the entire point.',
-    image: '/host-benefit-niche-visibility-800.png',
+    id: 'airbnb',
+    title: 'Keep Your Existing Airbnb Listing',
+    copy: 'No exclusivity required. Treehouse Trips is another channel — your Airbnb, Vrbo, and direct bookings stay exactly as they are.',
+    image: '/host-benefit-curated-discovery-800.png',
   },
   {
-    id: 'shareable',
-    title: 'More Shareable',
-    copy: 'Beautiful listings travelers actually send to friends — the kind of stays that spread by word of mouth.',
+    id: 'direct',
+    title: 'Direct Inquiries',
+    copy: 'Connect directly with interested guests through in-app messaging — personal conversations, not a black-box algorithm.',
+    image: '/host-benefit-direct-communication-800.png',
+  },
+  {
+    id: 'pricing',
+    title: 'Only $50 Per Year',
+    copy: 'Simple pricing. No commissions. No booking fees. Even one serious inquiry can make the year.',
     image: '/host-benefit-shareable-listings-800.png',
   },
+] as const
+
+export const DISCOVERY_CHANNELS = [
+  'Airbnb',
+  'Vrbo',
+  'Direct website',
+  'Instagram',
+  'Treehouse Trips',
 ] as const
 
 export const HOW_IT_WORKS = [
   {
     step: '01',
-    title: 'Apply',
-    copy: 'Create your listing and share your treehouse story — photos, vibe, and what makes your stay unforgettable.',
+    title: 'Create your listing',
+    copy: 'Share your photos, story, and booking links — scratch or import from Airbnb. Edit everything before you publish.',
   },
   {
     step: '02',
-    title: 'Get Featured',
-    copy: 'We showcase your property in a premium, visual-first environment built for discovery.',
+    title: 'Go live for $50/year',
+    copy: 'One flat annual fee per treehouse. No commissions on stays you book elsewhere.',
   },
   {
     step: '03',
-    title: 'Connect With Travelers',
-    copy: 'Interested guests reach out directly to learn more and book — you stay in control of the relationship.',
+    title: 'Connect with travelers',
+    copy: 'Interested guests discover you here and reach out directly. You stay in control of pricing and bookings.',
   },
 ] as const
 
