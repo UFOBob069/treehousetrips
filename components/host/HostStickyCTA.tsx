@@ -14,7 +14,7 @@ export default function HostStickyCTA({ visible, label, onClick }: HostStickyCTA
       <button
         type="button"
         onClick={onClick}
-        className="pointer-events-auto w-full rounded-full bg-forest-800 py-3.5 text-base font-medium text-white shadow-[0_8px_30px_rgba(15,26,16,0.35)] active:scale-[0.98] transition-transform"
+        className="pointer-events-auto w-full rounded-full border-2 border-amber-warm/80 bg-amber-warm/95 py-3.5 text-base font-semibold text-forest-950 shadow-[0_8px_30px_rgba(26,43,26,0.28)] hover:bg-amber-warm active:scale-[0.98] transition-all"
       >
         {label}
       </button>

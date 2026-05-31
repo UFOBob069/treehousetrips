@@ -19,7 +19,7 @@ export default function HeroSection() {
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-hero-gradient" />
-        <div className="absolute inset-0 bg-gradient-to-r from-forest-950/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-forest-950/22 via-transparent to-transparent" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-10 md:pb-16 pt-28 md:pt-32">
