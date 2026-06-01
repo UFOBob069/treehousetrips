@@ -30,7 +30,7 @@ export const COLLECTIONS = [
     id: 'luxury',
     title: 'Luxury Treehouses',
     subtitle: 'Elevated in every sense',
-    image: '/collection-interior-bedroom-windows-900.png',
+    image: '/collection-cedar-hot-tub-luxury-900.png',
     href: '/properties?collection=luxury',
   },
   {
@@ -127,7 +127,7 @@ export const SEASONAL = [
 
 export const BREAK_SECTIONS = [
   {
-    image: '/quote-break-treehouse-waterfall-v2-1920.png',
+    image: '/cinematic-treehouse-above-clouds-1920.png',
     quote: 'Some places don’t just host you — they change you.',
   },
   {
