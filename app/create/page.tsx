@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import { scrollPageToTop } from '@/lib/scroll-page'
 import HostOnboardingForm from '@/components/HostOnboardingForm'
 import HostLandingPage from '@/components/host/HostLandingPage'
 import ListingMethodChooser, { ListingMode } from '@/components/ListingMethodChooser'
@@ -19,20 +20,27 @@ function CreateListingContent() {
   const [submittedPropertyId, setSubmittedPropertyId] = useState('')
 
   useEffect(() => {
+    scrollPageToTop()
+  }, [])
+
+  useEffect(() => {
     const mode = searchParams.get('mode')
     if (user && (mode === 'scratch' || mode === 'import')) {
       setListingMode(mode)
+      scrollPageToTop()
     }
   }, [searchParams, user])
 
   const handleSelectMode = (mode: ListingMode) => {
     setListingMode(mode)
-    router.replace(`/create?mode=${mode}`, { scroll: false })
+    router.push(`/create?mode=${mode}`)
+    scrollPageToTop()
   }
 
   const handleBackToChooser = () => {
     setListingMode(null)
-    router.replace('/create', { scroll: false })
+    router.push('/create')
+    scrollPageToTop()
   }
 
   if (loading) {
@@ -67,7 +75,8 @@ function CreateListingContent() {
               onClick={() => {
                 setOnboardingComplete(false)
                 setListingMode(null)
-                router.replace('/create')
+                router.push('/create')
+                scrollPageToTop()
               }}
               className="rounded-full bg-stone-200/80 px-6 py-3 text-sm font-medium text-stone-700 hover:bg-stone-300/80 transition-colors"
             >

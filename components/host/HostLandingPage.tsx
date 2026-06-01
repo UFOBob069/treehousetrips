@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import AuthModal from '@/components/AuthModal'
 import { ListingMode } from '@/components/ListingMethodChooser'
 import { HOST_PRICE } from '@/lib/host-content'
+import { scrollPageToTop } from '@/lib/scroll-page'
 import HostHeroSection from './HostHeroSection'
 import HostPricingSection from './HostPricingSection'
 import HostChannelsSection from './HostChannelsSection'
@@ -24,20 +25,28 @@ export default function HostLandingPage() {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup')
   const [showStickyCta, setShowStickyCta] = useState(false)
 
+  useEffect(() => {
+    scrollPageToTop()
+  }, [])
+
   const scrollToGetStarted = useCallback(() => {
-    document.getElementById('get-started')?.scrollIntoView({ behavior: 'smooth' })
+    document.getElementById('get-started')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [])
 
   const handleListClick = useCallback(() => {
-    scrollToGetStarted()
-  }, [scrollToGetStarted])
+    if (onCreateRoute) {
+      scrollPageToTop('smooth')
+      return
+    }
+    router.push('/create')
+  }, [onCreateRoute, router])
 
   const handleCreateListing = () => {
     if (user) {
       if (onCreateRoute) {
         scrollToGetStarted()
       } else {
-        router.push('/create#get-started')
+        router.push('/create')
       }
       return
     }
@@ -70,11 +79,11 @@ export default function HostLandingPage() {
     if (!user || !showAuthModal) return
     setShowAuthModal(false)
     if (onCreateRoute) {
-      scrollToGetStarted()
+      scrollPageToTop()
     } else {
-      router.push('/create#get-started')
+      router.push('/create')
     }
-  }, [user, showAuthModal, onCreateRoute, scrollToGetStarted, router])
+  }, [user, showAuthModal, onCreateRoute, router])
 
   const stickyLabel = user ? `Continue your listing — ${HOST_PRICE}` : `List your treehouse — ${HOST_PRICE}`
 
@@ -99,7 +108,11 @@ export default function HostLandingPage() {
         authLoading={authLoading}
       />
 
-      <HostStickyCTA visible={showStickyCta && !authLoading} label={stickyLabel} onClick={handleListClick} />
+      <HostStickyCTA
+        visible={showStickyCta && !authLoading}
+        label={stickyLabel}
+        onClick={scrollToGetStarted}
+      />
     </div>
   )
 }
