@@ -46,6 +46,7 @@ const PROPERTY_WRITE_KEYS = [
   'showContactEmail',
   'showContactPhone',
   'airbnbUrl',
+  'websiteUrl',
   'bookingLinks',
   'images',
   'tags',
@@ -125,6 +126,8 @@ export interface Property {
   /** When true, phone is shown to signed-in guests on the listing and in messages */
   showContactPhone?: boolean
   airbnbUrl?: string
+  /** Direct site URL — shown on the public listing as a follow link (SEO backlink) */
+  websiteUrl?: string
   /** Optional extra booking links (direct site, VRBO, etc.) */
   bookingLinks?: BookingLink[]
   images: string[]

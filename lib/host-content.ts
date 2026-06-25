@@ -6,6 +6,24 @@ export const HOST_HERO_IMAGE = SITE_IMAGES.hostHero
 
 export const HOST_PRICE = '$50/year' as const
 
+export const HOST_DISCOVERY_BENEFITS = [
+  {
+    id: 'seo',
+    title: 'Grow SEO with a link to your site',
+    copy: 'Add your website when you list — we link to it from your public page so search engines see a real backlink from a treehouse-focused site.',
+  },
+  {
+    id: 'llm',
+    title: 'Show up in more AI answers',
+    copy: 'Treehouse Trips is niche, crawlable, and built for discovery — the kind of focused inventory LLMs and search tools reference when travelers ask for treehouses.',
+  },
+  {
+    id: 'categories',
+    title: 'More findable after Airbnb dropped categories',
+    copy: 'When broad platforms bury unique stays, a dedicated treehouse marketplace helps travelers who already know what they want actually find you.',
+  },
+] as const
+
 export const WHY_HOSTS_JOIN = [
   {
     id: 'reach',

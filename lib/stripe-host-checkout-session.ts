@@ -59,6 +59,7 @@ export function buildHostListingCheckoutSession(
     consent_collection: {
       payment_method_reuse_agreement: { position: 'hidden' },
     },
+    allow_promotion_codes: true,
     metadata: {
       userId,
       propertyId,

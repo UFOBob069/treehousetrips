@@ -40,6 +40,7 @@ interface Property {
   showContactEmail?: boolean
   showContactPhone?: boolean
   bookingLinks?: BookingLink[]
+  websiteUrl?: string
   exactAddress?: string
   isPublished: boolean
 }
@@ -251,6 +252,18 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                 {property.description}
               </p>
+              {property.websiteUrl?.trim() ? (
+                <p className="mt-4 text-gray-700">
+                  Learn more on{' '}
+                  <a
+                    href={property.websiteUrl}
+                    className="font-medium text-forest-800 underline underline-offset-2 hover:text-forest-950"
+                  >
+                    {property.title || property.name}&apos;s website
+                  </a>
+                  .
+                </p>
+              ) : null}
             </div>
 
             {/* Treehouse Features */}
@@ -362,6 +375,15 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 </div>
 
                 <div className="space-y-3 mb-6">
+                  {property.websiteUrl?.trim() ? (
+                    <a
+                      href={property.websiteUrl}
+                      className="w-full bg-forest-700 text-white py-3 rounded-lg font-semibold hover:bg-forest-600 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <ExternalLink size={18} />
+                      Visit host website
+                    </a>
+                  ) : null}
                   {property.airbnbUrl?.trim() ? (
                     <Link
                       href={property.airbnbUrl}
@@ -431,6 +453,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           showContactEmail: property.showContactEmail,
           showContactPhone: property.showContactPhone,
           ...(property.airbnbUrl ? { airbnbUrl: property.airbnbUrl } : {}),
+          ...(property.websiteUrl ? { websiteUrl: property.websiteUrl } : {}),
           ...(property.bookingLinks ? { bookingLinks: property.bookingLinks } : {}),
           images: property.images,
           tags: property.tags,

@@ -45,6 +45,7 @@ interface ListingFormData {
   showContactEmail: boolean
   showContactPhone: boolean
   airbnbUrl: string
+  websiteUrl: string
   bookingLinks: BookingLink[]
   images: string[]
   tags: string[]
@@ -72,6 +73,7 @@ const createEmptyFormData = (email = ''): ListingFormData => ({
   showContactEmail: false,
   showContactPhone: false,
   airbnbUrl: '',
+  websiteUrl: '',
   bookingLinks: [],
   images: [],
   tags: [],
@@ -98,6 +100,7 @@ function propertyToFormData(property: Property, fallbackEmail = ''): ListingForm
     showContactEmail: property.showContactEmail ?? false,
     showContactPhone: property.showContactPhone ?? false,
     airbnbUrl: property.airbnbUrl || '',
+    websiteUrl: property.websiteUrl || '',
     bookingLinks: property.bookingLinks || [],
     images: property.images || [],
     tags: property.tags || [],
@@ -304,6 +307,7 @@ export default function HostOnboardingForm({
         showContactEmail: formData.showContactEmail,
         showContactPhone: formData.showContactPhone,
         ...(formData.airbnbUrl.trim() ? { airbnbUrl: formData.airbnbUrl.trim() } : {}),
+        ...(formData.websiteUrl.trim() ? { websiteUrl: formData.websiteUrl.trim() } : {}),
         ...(formData.bookingLinks.length > 0
           ? {
               bookingLinks: formData.bookingLinks.filter(
@@ -725,6 +729,24 @@ export default function HostOnboardingForm({
                   <p className="text-xs text-gray-500">
                     Airbnb is optional. Add any other links you use (direct booking, VRBO, your website).
                   </p>
+
+                  <div className="rounded-xl border border-forest-200 bg-forest-50/60 p-4 space-y-2">
+                    <label className="block text-sm font-medium text-forest-900">
+                      Your website URL <span className="font-normal text-stone-600">(SEO backlink)</span>
+                    </label>
+                    <p className="text-xs text-stone-600 leading-relaxed">
+                      We link to your site from your public listing — a real backlink from a
+                      treehouse-focused page that can help your search rankings.
+                    </p>
+                    <input
+                      type="url"
+                      value={formData.websiteUrl}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, websiteUrl: e.target.value }))}
+                      placeholder="https://yourtreehouse.com"
+                      className="w-full px-3 py-2 border border-stone-300 rounded-lg bg-white focus:ring-2 focus:ring-forest-600 focus:border-transparent"
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Airbnb listing URL</label>
                     <input
@@ -944,10 +966,11 @@ export default function HostOnboardingForm({
                         {formData.showContactPhone ? ' (visible when signed in)' : ' (hidden)'}
                       </p>
                     )}
-                    {(formData.airbnbUrl || formData.bookingLinks.length > 0) && (
+                    {(formData.airbnbUrl || formData.websiteUrl || formData.bookingLinks.length > 0) && (
                       <div className="pt-2">
                         <span className="font-medium text-gray-700">Booking links:</span>
                         <ul className="mt-1 list-disc list-inside">
+                          {formData.websiteUrl.trim() && <li>Your website (backlink)</li>}
                           {formData.airbnbUrl.trim() && <li>Airbnb</li>}
                           {formData.bookingLinks.map((l, i) =>
                             l.label.trim() ? <li key={i}>{l.label}</li> : null

@@ -9,6 +9,7 @@ import { HOST_PRICE } from '@/lib/host-content'
 import { scrollPageToTop } from '@/lib/scroll-page'
 import HostHeroSection from './HostHeroSection'
 import HostPricingSection from './HostPricingSection'
+import HostDiscoveryBenefitsSection from './HostDiscoveryBenefitsSection'
 import HostChannelsSection from './HostChannelsSection'
 import WhyHostsJoinSection from './WhyHostsJoinSection'
 import HowItWorks from './HowItWorks'
@@ -97,6 +98,7 @@ export default function HostLandingPage() {
 
       <HostHeroSection onListClick={handleListClick} />
       <HostPricingSection />
+      <HostDiscoveryBenefitsSection />
       <HostChannelsSection />
       <WhyHostsJoinSection />
       <HowItWorks />
