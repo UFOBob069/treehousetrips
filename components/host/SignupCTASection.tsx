@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext'
 import ListingMethodChooser, { ListingMode } from '@/components/ListingMethodChooser'
 import { HOST_PRICE } from '@/lib/host-content'
+import GetStartedCard from './GetStartedCard'
 
 interface SignupCTASectionProps {
   onCreateListing: () => void
@@ -20,10 +21,7 @@ export default function SignupCTASection({
   const { user } = useAuth()
 
   return (
-    <section
-      id="get-started"
-      className="py-20 md:py-28 bg-forest-950 relative overflow-hidden scroll-mt-20"
-    >
+    <section className="py-20 md:py-28 bg-forest-950 relative overflow-hidden">
       <div
         className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-moss/40 via-transparent to-transparent"
         aria-hidden
@@ -59,40 +57,15 @@ export default function SignupCTASection({
               {HOST_PRICE} · No commissions
             </p>
             <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-white tracking-tight">
-              Be where treehouse travelers are looking
+              Ready to list your treehouse?
             </h2>
             <p className="mt-4 text-white/70 text-base md:text-lg max-w-lg mx-auto leading-relaxed">
-              Join a curated marketplace built exclusively for treehouse stays. No complicated setup.
-              Just <span className="font-semibold text-amber-warm">{HOST_PRICE}</span>.
+              Join hosts who are getting discovered by travelers searching specifically for
+              treehouses.
             </p>
 
-            <div className="mt-10 rounded-3xl bg-cream/95 backdrop-blur-sm p-8 md:p-10 shadow-2xl max-w-md mx-auto text-left">
-              <div className="mb-6 text-center rounded-2xl border border-forest-200 bg-forest-50/80 px-4 py-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-moss">Annual listing</p>
-                <p className="mt-1 font-serif text-4xl text-forest-900">{HOST_PRICE}</p>
-                <p className="mt-1 text-sm text-stone-600">per treehouse · no booking fees</p>
-              </div>
-
-              <button
-                type="button"
-                onClick={onCreateListing}
-                className="w-full rounded-full border-2 border-amber-warm/80 bg-amber-warm/95 py-3.5 text-base font-semibold text-forest-950 hover:bg-amber-warm transition-colors shadow-md"
-              >
-                Create listing — {HOST_PRICE}
-              </button>
-              <p className="mt-5 text-center text-sm text-stone-600">
-                Already have an account?{' '}
-                <button
-                  type="button"
-                  onClick={onSignIn}
-                  className="font-medium text-forest-800 hover:text-forest-950 underline-offset-2 hover:underline"
-                >
-                  Sign in
-                </button>
-              </p>
-              <p className="mt-4 text-center text-xs text-stone-500 leading-relaxed">
-                Keep your Airbnb listing · Direct traveler inquiries · Cancel before renewal
-              </p>
+            <div className="mt-10">
+              <GetStartedCard onCreateListing={onCreateListing} onSignIn={onSignIn} />
             </div>
           </div>
         )}

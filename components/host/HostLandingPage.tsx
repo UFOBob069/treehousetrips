@@ -8,6 +8,7 @@ import { ListingMode } from '@/components/ListingMethodChooser'
 import { HOST_PRICE } from '@/lib/host-content'
 import { scrollPageToTop } from '@/lib/scroll-page'
 import HostHeroSection from './HostHeroSection'
+import HostGetStartedSection from './HostGetStartedSection'
 import HostPricingSection from './HostPricingSection'
 import HostDiscoveryBenefitsSection from './HostDiscoveryBenefitsSection'
 import HostChannelsSection from './HostChannelsSection'
@@ -34,31 +35,27 @@ export default function HostLandingPage() {
     document.getElementById('get-started')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [])
 
-  const handleListClick = useCallback(() => {
-    if (onCreateRoute) {
-      scrollPageToTop('smooth')
-      return
-    }
-    router.push('/create')
-  }, [onCreateRoute, router])
-
-  const handleCreateListing = () => {
+  const handleCreateListing = useCallback(() => {
     if (user) {
-      if (onCreateRoute) {
-        scrollToGetStarted()
-      } else {
-        router.push('/create')
-      }
+      scrollToGetStarted()
       return
     }
     setAuthMode('signup')
     setShowAuthModal(true)
-  }
+  }, [user, scrollToGetStarted])
 
-  const handleSignIn = () => {
+  const handleListClick = useCallback(() => {
+    if (onCreateRoute) {
+      scrollToGetStarted()
+      return
+    }
+    router.push('/create')
+  }, [onCreateRoute, router, scrollToGetStarted])
+
+  const handleSignIn = useCallback(() => {
     setAuthMode('login')
     setShowAuthModal(true)
-  }
+  }, [])
 
   const handleSelectMode = (mode: ListingMode) => {
     router.push(`/create?mode=${mode}`)
@@ -80,11 +77,11 @@ export default function HostLandingPage() {
     if (!user || !showAuthModal) return
     setShowAuthModal(false)
     if (onCreateRoute) {
-      scrollPageToTop()
+      scrollToGetStarted()
     } else {
       router.push('/create')
     }
-  }, [user, showAuthModal, onCreateRoute, router])
+  }, [user, showAuthModal, onCreateRoute, scrollToGetStarted, router])
 
   const stickyLabel = user ? `Continue your listing — ${HOST_PRICE}` : `List your treehouse — ${HOST_PRICE}`
 
@@ -97,6 +94,11 @@ export default function HostLandingPage() {
       />
 
       <HostHeroSection onListClick={handleListClick} />
+      <HostGetStartedSection
+        onCreateListing={handleCreateListing}
+        onSignIn={handleSignIn}
+        authLoading={authLoading}
+      />
       <HostPricingSection />
       <HostDiscoveryBenefitsSection />
       <HostChannelsSection />
